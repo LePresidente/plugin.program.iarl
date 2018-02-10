@@ -1,112 +1,3 @@
-<!DOCTYPE datafile [
-<!ELEMENT datafile ANY>
-	<!ELEMENT header ANY>
-		<!ELEMENT emu_name (#PCDATA)>
-		<!ELEMENT emu_parser (#PCDATA)>
-		<!ELEMENT emu_description (#PCDATA)>
-		<!ELEMENT emu_category (#PCDATA)>
-		<!ELEMENT emu_version (#PCDATA)>
-		<!ELEMENT emu_date (#PCDATA)>
-		<!ELEMENT emu_author (#PCDATA)>
-		<!ELEMENT emu_homepage (#PCDATA)>
-		<!ELEMENT emu_baseurl (#PCDATA)>
-		<!ELEMENT emu_launcher (#PCDATA)>
-		<!ELEMENT emu_ext_launch_cmd (#PCDATA)>
-		<!ELEMENT emu_downloadpath (#PCDATA)>
-		<!ELEMENT emu_postdlaction (#PCDATA)>
-		<!ELEMENT emu_comment (#PCDATA)>
-		<!ELEMENT emu_thumb (#PCDATA)>
-		<!ELEMENT emu_banner (#PCDATA)>
-		<!ELEMENT emu_fanart (#PCDATA)>
-		<!ELEMENT emu_logo (#PCDATA)>
-		<!ELEMENT emu_trailer (#PCDATA)>
-	<!ELEMENT game ANY>
-		<!ATTLIST game name CDATA #REQUIRED>
-		<!ELEMENT description (#PCDATA)>
-		<!ELEMENT rom EMPTY>
-			<!ATTLIST rom name CDATA #REQUIRED>
-			<!ATTLIST rom size CDATA #REQUIRED>
-			<!ATTLIST rom crc CDATA #IMPLIED>
-			<!ATTLIST rom sha1 CDATA #IMPLIED>
-			<!ATTLIST rom status (baddump|nodump|good|verified) "good">
-		<!ELEMENT emu_command (#PCDATA)>
-		<!ELEMENT videoid (#PCDATA)>
-		<!ELEMENT plot (#PCDATA)>
-		<!ELEMENT genre (#PCDATA)>
-		<!ELEMENT nplayers (#PCDATA)>
-		<!ELEMENT studio (#PCDATA)>
-		<!ELEMENT releasedate (#PCDATA)>
-		<!ELEMENT fanart1 (#PCDATA)>
-		<!ELEMENT fanart2 (#PCDATA)>
-		<!ELEMENT fanart3 (#PCDATA)>
-		<!ELEMENT fanart4 (#PCDATA)>
-		<!ELEMENT fanart5 (#PCDATA)>
-		<!ELEMENT fanart6 (#PCDATA)>
-		<!ELEMENT fanart7 (#PCDATA)>
-		<!ELEMENT fanart8 (#PCDATA)>
-		<!ELEMENT fanart9 (#PCDATA)>
-		<!ELEMENT fanart10 (#PCDATA)>
-		<!ELEMENT fanart11 (#PCDATA)>
-		<!ELEMENT fanart12 (#PCDATA)>
-		<!ELEMENT fanart13 (#PCDATA)>
-		<!ELEMENT fanart14 (#PCDATA)>
-		<!ELEMENT fanart15 (#PCDATA)>
-		<!ELEMENT fanart16 (#PCDATA)>
-		<!ELEMENT fanart17 (#PCDATA)>
-		<!ELEMENT fanart18 (#PCDATA)>
-		<!ELEMENT fanart19 (#PCDATA)>
-		<!ELEMENT fanart20 (#PCDATA)>
-		<!ELEMENT fanart21 (#PCDATA)>
-		<!ELEMENT fanart22 (#PCDATA)>
-		<!ELEMENT fanart23 (#PCDATA)>
-		<!ELEMENT fanart24 (#PCDATA)>
-		<!ELEMENT fanart25 (#PCDATA)>
-		<!ELEMENT fanart26 (#PCDATA)>
-		<!ELEMENT fanart27 (#PCDATA)>
-		<!ELEMENT fanart28 (#PCDATA)>
-		<!ELEMENT fanart29 (#PCDATA)>
-		<!ELEMENT fanart30 (#PCDATA)>
-		<!ELEMENT boxart1 (#PCDATA)>
-		<!ELEMENT boxart2 (#PCDATA)>
-		<!ELEMENT boxart3 (#PCDATA)>
-		<!ELEMENT boxart4 (#PCDATA)>
-		<!ELEMENT boxart5 (#PCDATA)>
-		<!ELEMENT boxart6 (#PCDATA)>
-		<!ELEMENT boxart7 (#PCDATA)>
-		<!ELEMENT boxart8 (#PCDATA)>
-		<!ELEMENT boxart9 (#PCDATA)>
-		<!ELEMENT boxart10 (#PCDATA)>
-		<!ELEMENT snapshot1 (#PCDATA)>
-		<!ELEMENT snapshot2 (#PCDATA)>
-		<!ELEMENT snapshot3 (#PCDATA)>
-		<!ELEMENT snapshot4 (#PCDATA)>
-		<!ELEMENT snapshot5 (#PCDATA)>
-		<!ELEMENT snapshot6 (#PCDATA)>
-		<!ELEMENT snapshot7 (#PCDATA)>
-		<!ELEMENT snapshot8 (#PCDATA)>
-		<!ELEMENT snapshot9 (#PCDATA)>
-		<!ELEMENT snapshot10 (#PCDATA)>
-		<!ELEMENT banner1 (#PCDATA)>
-		<!ELEMENT banner2 (#PCDATA)>
-		<!ELEMENT banner3 (#PCDATA)>
-		<!ELEMENT banner4 (#PCDATA)>
-		<!ELEMENT banner5 (#PCDATA)>
-		<!ELEMENT banner6 (#PCDATA)>
-		<!ELEMENT banner7 (#PCDATA)>
-		<!ELEMENT banner8 (#PCDATA)>
-		<!ELEMENT banner9 (#PCDATA)>
-		<!ELEMENT banner10 (#PCDATA)>
-		<!ELEMENT clearlogo1 (#PCDATA)>
-		<!ELEMENT clearlogo2 (#PCDATA)>
-		<!ELEMENT clearlogo3 (#PCDATA)>
-		<!ELEMENT clearlogo4 (#PCDATA)>
-		<!ELEMENT clearlogo5 (#PCDATA)>
-		<!ELEMENT clearlogo6 (#PCDATA)>
-		<!ELEMENT clearlogo7 (#PCDATA)>
-		<!ELEMENT clearlogo8 (#PCDATA)>
-		<!ELEMENT clearlogo9 (#PCDATA)>
-		<!ELEMENT clearlogo10 (#PCDATA)>
-]>
 	<datafile>
 		<header>
 			<emu_name>x68000</emu_name>
@@ -118,31 +9,15 @@
 			<emu_author>Zach Morris</emu_author>
 			<emu_homepage>http://www.tosecdev.org/</emu_homepage>
 			<emu_baseurl>http://archive.org/download/</emu_baseurl>
-			<emu_launcher>external</emu_launcher>
+			<emu_launcher>retroplayer</emu_launcher>
 			<emu_ext_launch_cmd>none</emu_ext_launch_cmd>
 			<emu_downloadpath>default</emu_downloadpath>
-			<emu_postdlaction>convert_mame_softlist('x68k_flop')</emu_postdlaction>
-			<emu_comment>Sharp x68000 List by Zach Morris, filtered to remove duplicates and games not many people actually want to play.[CR]The X68000 is a home computer created by Sharp Corporation, first released in 1987, sold only in Japan. In terms of hardware, it is very similar to arcade machines of the time, and serves as the Capcom CPS system development machine. It supports separate text RAM, graphic RAM and hardware sprites. Sound is produced internally via Yamaha's then top-of-the-line YM2151 FM synthesizer and a single channel OKI MSM6258V for PCM. Due to this and other similarities, it played host to many arcade game ports in its day. Games made for this system include Parodius Da! －Shinwa kara Owarai e－, Ghouls 'n Ghosts, Strider, Final Fight, Alien Syndrome, Street Fighter II Dash, Akumajo Dracula (Castlevania in other regions, the X68000 version was ported to the PlayStation as Castlevania Chronicles), Cho Ren Sha 68k (which has a Windows port) and many others. Many games also supported the Roland SC-55 and MT-32 MIDI modules for sound as well as mixed-mode internal/external output.
-
-Developer:  Sharp Corporation
-
-Manufacturer:  Sharp Corporation
-
-CPU:  Hitachi HD68HC000 10 MHz
-
-Memory:  12 MB
-
-Graphics:  256 × 240
-
-Sound:  Yamaha YM2151, OKI MSM6258
-
-Media:  Floppy
-
-Max Controllers:  2</emu_comment>
-			<emu_thumb>http://i.imgur.com/HLzkiBD.jpg</emu_thumb>
-			<emu_banner>http://i.imgur.com/4UCPbPK.jpg</emu_banner>
-			<emu_fanart>https://upload.wikimedia.org/wikipedia/ja/thumb/3/3c/X68000_EXPERT2.JPG/1280px-X68000_EXPERT2.JPG</emu_fanart>
-			<emu_logo>http://i.imgur.com/CtqnrLl.png</emu_logo>
+			<emu_postdlaction>convert_mess2014_softlist('x68k_flop')</emu_postdlaction>
+			<emu_comment>Sharp x68000 List by Zach Morris, filtered to remove duplicates and games not many people actually want to play.[CR]The X68000 is a home computer created by Sharp Corporation, first released in 1987, sold only in Japan. In terms of hardware, it is very similar to arcade machines of the time, and serves as the Capcom CPS system development machine. It supports separate text RAM, graphic RAM and hardware sprites. Sound is produced internally via Yamaha's then top-of-the-line YM2151 FM synthesizer and a single channel OKI MSM6258V for PCM. Due to this and other similarities, it played host to many arcade game ports in its day. Games made for this system include Parodius Da! －Shinwa kara Owarai e－, Ghouls 'n Ghosts, Strider, Final Fight, Alien Syndrome, Street Fighter II Dash, Akumajo Dracula (Castlevania in other regions, the X68000 version was ported to the PlayStation as Castlevania Chronicles), Cho Ren Sha 68k (which has a Windows port) and many others. Many games also supported the Roland SC-55 and MT-32 MIDI modules for sound as well as mixed-mode internal/external output.[CR]Developer:  Sharp Corporation[CR]Manufacturer:  Sharp Corporation[CR]CPU:  Hitachi HD68HC000 10 MHz[CR]Memory:  12 MB[CR]Graphics:  256 × 240[CR]Sound:  Yamaha YM2151, OKI MSM6258[CR]Media:  Floppy[CR]Max Controllers:  2</emu_comment>
+			<emu_thumb>https://i.imgur.com/HLzkiBD.jpg</emu_thumb>
+			<emu_banner>https://i.imgur.com/4UCPbPK.jpg</emu_banner>
+			<emu_fanart>https://i.imgur.com/hbsFcMK.jpg</emu_fanart>
+			<emu_logo>https://i.imgur.com/CtqnrLl.png</emu_logo>
 			<emu_trailer>hlgEY7ZX30I</emu_trailer>
 		</header>
 			<game name="177">

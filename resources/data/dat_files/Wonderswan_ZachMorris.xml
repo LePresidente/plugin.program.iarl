@@ -1,132 +1,23 @@
-<!DOCTYPE datafile [
-<!ELEMENT datafile ANY>
-	<!ELEMENT header ANY>
-		<!ELEMENT emu_name (#PCDATA)>
-		<!ELEMENT emu_parser (#PCDATA)>
-		<!ELEMENT emu_description (#PCDATA)>
-		<!ELEMENT emu_category (#PCDATA)>
-		<!ELEMENT emu_version (#PCDATA)>
-		<!ELEMENT emu_date (#PCDATA)>
-		<!ELEMENT emu_author (#PCDATA)>
-		<!ELEMENT emu_homepage (#PCDATA)>
-		<!ELEMENT emu_baseurl (#PCDATA)>
-		<!ELEMENT emu_launcher (#PCDATA)>
-		<!ELEMENT emu_ext_launch_cmd (#PCDATA)>
-		<!ELEMENT emu_downloadpath (#PCDATA)>
-		<!ELEMENT emu_postdlaction (#PCDATA)>
-		<!ELEMENT emu_comment (#PCDATA)>
-		<!ELEMENT emu_thumb (#PCDATA)>
-		<!ELEMENT emu_banner (#PCDATA)>
-		<!ELEMENT emu_fanart (#PCDATA)>
-		<!ELEMENT emu_logo (#PCDATA)>
-		<!ELEMENT emu_trailer (#PCDATA)>
-	<!ELEMENT game ANY>
-		<!ATTLIST game name CDATA #REQUIRED>
-		<!ELEMENT description (#PCDATA)>
-		<!ELEMENT rom EMPTY>
-			<!ATTLIST rom name CDATA #REQUIRED>
-			<!ATTLIST rom size CDATA #REQUIRED>
-			<!ATTLIST rom crc CDATA #IMPLIED>
-			<!ATTLIST rom sha1 CDATA #IMPLIED>
-			<!ATTLIST rom status (baddump|nodump|good|verified) "good">
-		<!ELEMENT emu_command (#PCDATA)>
-		<!ELEMENT videoid (#PCDATA)>
-		<!ELEMENT plot (#PCDATA)>
-		<!ELEMENT genre (#PCDATA)>
-		<!ELEMENT nplayers (#PCDATA)>
-		<!ELEMENT studio (#PCDATA)>
-		<!ELEMENT releasedate (#PCDATA)>
-		<!ELEMENT fanart1 (#PCDATA)>
-		<!ELEMENT fanart2 (#PCDATA)>
-		<!ELEMENT fanart3 (#PCDATA)>
-		<!ELEMENT fanart4 (#PCDATA)>
-		<!ELEMENT fanart5 (#PCDATA)>
-		<!ELEMENT fanart6 (#PCDATA)>
-		<!ELEMENT fanart7 (#PCDATA)>
-		<!ELEMENT fanart8 (#PCDATA)>
-		<!ELEMENT fanart9 (#PCDATA)>
-		<!ELEMENT fanart10 (#PCDATA)>
-		<!ELEMENT fanart11 (#PCDATA)>
-		<!ELEMENT fanart12 (#PCDATA)>
-		<!ELEMENT fanart13 (#PCDATA)>
-		<!ELEMENT fanart14 (#PCDATA)>
-		<!ELEMENT fanart15 (#PCDATA)>
-		<!ELEMENT fanart16 (#PCDATA)>
-		<!ELEMENT fanart17 (#PCDATA)>
-		<!ELEMENT fanart18 (#PCDATA)>
-		<!ELEMENT fanart19 (#PCDATA)>
-		<!ELEMENT fanart20 (#PCDATA)>
-		<!ELEMENT fanart21 (#PCDATA)>
-		<!ELEMENT fanart22 (#PCDATA)>
-		<!ELEMENT fanart23 (#PCDATA)>
-		<!ELEMENT fanart24 (#PCDATA)>
-		<!ELEMENT fanart25 (#PCDATA)>
-		<!ELEMENT fanart26 (#PCDATA)>
-		<!ELEMENT fanart27 (#PCDATA)>
-		<!ELEMENT fanart28 (#PCDATA)>
-		<!ELEMENT fanart29 (#PCDATA)>
-		<!ELEMENT fanart30 (#PCDATA)>
-		<!ELEMENT boxart1 (#PCDATA)>
-		<!ELEMENT boxart2 (#PCDATA)>
-		<!ELEMENT boxart3 (#PCDATA)>
-		<!ELEMENT boxart4 (#PCDATA)>
-		<!ELEMENT boxart5 (#PCDATA)>
-		<!ELEMENT boxart6 (#PCDATA)>
-		<!ELEMENT boxart7 (#PCDATA)>
-		<!ELEMENT boxart8 (#PCDATA)>
-		<!ELEMENT boxart9 (#PCDATA)>
-		<!ELEMENT boxart10 (#PCDATA)>
-		<!ELEMENT snapshot1 (#PCDATA)>
-		<!ELEMENT snapshot2 (#PCDATA)>
-		<!ELEMENT snapshot3 (#PCDATA)>
-		<!ELEMENT snapshot4 (#PCDATA)>
-		<!ELEMENT snapshot5 (#PCDATA)>
-		<!ELEMENT snapshot6 (#PCDATA)>
-		<!ELEMENT snapshot7 (#PCDATA)>
-		<!ELEMENT snapshot8 (#PCDATA)>
-		<!ELEMENT snapshot9 (#PCDATA)>
-		<!ELEMENT snapshot10 (#PCDATA)>
-		<!ELEMENT banner1 (#PCDATA)>
-		<!ELEMENT banner2 (#PCDATA)>
-		<!ELEMENT banner3 (#PCDATA)>
-		<!ELEMENT banner4 (#PCDATA)>
-		<!ELEMENT banner5 (#PCDATA)>
-		<!ELEMENT banner6 (#PCDATA)>
-		<!ELEMENT banner7 (#PCDATA)>
-		<!ELEMENT banner8 (#PCDATA)>
-		<!ELEMENT banner9 (#PCDATA)>
-		<!ELEMENT banner10 (#PCDATA)>
-		<!ELEMENT clearlogo1 (#PCDATA)>
-		<!ELEMENT clearlogo2 (#PCDATA)>
-		<!ELEMENT clearlogo3 (#PCDATA)>
-		<!ELEMENT clearlogo4 (#PCDATA)>
-		<!ELEMENT clearlogo5 (#PCDATA)>
-		<!ELEMENT clearlogo6 (#PCDATA)>
-		<!ELEMENT clearlogo7 (#PCDATA)>
-		<!ELEMENT clearlogo8 (#PCDATA)>
-		<!ELEMENT clearlogo9 (#PCDATA)>
-		<!ELEMENT clearlogo10 (#PCDATA)>
-]>
 	<datafile>
 		<header>
-			<emu_name>Woderswan</emu_name>
+			<emu_name>Wonderswan</emu_name>
 			<emu_parser>NoIntro_parser.xml</emu_parser>
-			<emu_description>Woderswan</emu_description>
+			<emu_description>Wonderswan</emu_description>
 			<emu_category>Bandai</emu_category>
 			<emu_version>070116</emu_version>
 			<emu_date>07/01/2016</emu_date>
 			<emu_author>Zach Morris</emu_author>
 			<emu_homepage>http://www.no-intro.org</emu_homepage>
 			<emu_baseurl>http://archive.org/download/</emu_baseurl>
-			<emu_launcher>external</emu_launcher>
+			<emu_launcher>retroplayer</emu_launcher>
 			<emu_ext_launch_cmd>none</emu_ext_launch_cmd>
 			<emu_downloadpath>default</emu_downloadpath>
 			<emu_postdlaction>unzip_rom</emu_postdlaction>
 			<emu_comment>Bandai WonderSwan List by Zach Morris.  This is the FULL UNFILTERED list from the archive.[CR]The WonderSwan was a line of handheld game consoles produced in Japan by Bandai. It was developed by Gunpei Yokois company Koto and Bandai. The WonderSwan was made to compete with the Neo Geo Pocket Color and the market leader Nintendos Game Boy Color (even though the developer for the WonderSwan, Gunpei Yokoi, developed the original Nintendo Game Boy). The original WonderSwan was later replaced by the WonderSwan Color, although some WonderSwan Color games are compatible with the original WonderSwan, many are designed exclusively for the WonderSwan Color and show a message such as "This cartridge is for WonderSwan Color only" when run on the original WonderSwan. The WonderSwan is playable both vertically and horizontally, and feature a fairly large library of games, including numerous first-party titles based on licensed anime properties, with significant third-party support from Square and Capcom. As it was a console designed essentially for the Japanese market, most of the games are in Japanese, with only a few featuring English text.[CR]Developer:Bandai[CR]Manufacturer:Bandai[CR]CPU:  16-bit NEC V30 MZ processor at 3.072 MHz[CR]Memory:  Built-in EEPROM and 1Kbit RAM[CR]Sound: 4 digital audio channels[CR]Display:  224 x 144[CR]Media:  Cartridge[CR]Max Controllers:  1</emu_comment>
-			<emu_thumb>http://i.imgur.com/d8gMqxx.jpg</emu_thumb>
-			<emu_banner>http://i.imgur.com/lsatiUJ.jpg</emu_banner>
-			<emu_fanart>https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/WonderSwan-Black-Left.jpg/1024px-WonderSwan-Black-Left.jpg</emu_fanart>
-			<emu_logo>http://i.imgur.com/cXmTkkp.png</emu_logo>
+			<emu_thumb>https://i.imgur.com/d8gMqxx.jpg</emu_thumb>
+			<emu_banner>https://i.imgur.com/lsatiUJ.jpg</emu_banner>
+			<emu_fanart>https://i.imgur.com/jhXsAUo.jpg</emu_fanart>
+			<emu_logo>https://i.imgur.com/cXmTkkp.png</emu_logo>
 			<emu_trailer>YEpnxE5zPos</emu_trailer>
 		</header>
 			<game name="Anchorz Field (Japan)">

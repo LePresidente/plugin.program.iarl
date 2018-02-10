@@ -1,32 +1,22 @@
 Internet Archive ROM Launcher Change Log
-8-8-17
-Updated FBA to v0.2.97.42
 
-8-6-17
-Updated SNES and NES
-Updated IARL Favorites function to bookmark rather than copy all settings
+02-06-2017
+Fixed some typos (thanks RobLoach)
+Added EasyRPG games list
+Added support for some more MAME softlist systems (game lists to be added soon)
+Attempt to provide skinning ability for ROM Info Window (thanks DjCisco)
+Updated MAME lists to 0.193 (latest available)
+Updated wizard for new game lists
+Updated external launch database to be inline with Retroarch core changes
+Update readme to highlight the fact that IARL is in fact open source and free.  Dont sell it. It's $Free.99 yo!
 
-6-5-17
-Updated Final Burn Alpha to latest version set 0.2.97.40
-Updated MAME and multiple MESS sets to latest available version 0.185
-Fixed bug in wizard for Kodi / retroplayer setup (thanks MrTarantula)
-Updated function to check for bad file(s) returned by archive.org - more verbose in failure now
-Updated external launch functions for linux systems, add-on will now look for the libretro core path (linux has lots of places it could be depending on the OS, thanks to lpenz)
-Updated Commodore 64 to new archive for use with new retroarch core (VICE)
-
-
-4-3-17
-Added support for special paths in addon settings
-Added advanced settings to allow for post download function editing
-Fix for github issue #27 - should resolve issues with locally saved files not correctly recognized
-Added post dl function for MESS2014
-Fix divide by zero bug in downloading
-Setting name changes for clarification (email and gamestarter)
-Added PCE CD Archive (328 Games)
-Added wizard setting for PCE CD
-Rescraped Final Burn Alpha (0.2.97.39), added additional metadata (1479 Games Filtered, 4134 Games Unfiltered)
-Rescraped SNES, added additional metadata, inline with IADB (2243 Games Filtered, 3641 Games Unfiltered)
-Updated some images for archive listings that were not available
-Added new viewtypes by adding setcontent in addon
-Added advanced setting to change addon content type (default to TVShow for most viewtypes currently, will eventually default to games)
-A few code improvements and small bugfixes
+12-23-2017
+Update Quake List to fix launching and add mission packs
+Add GB Classic and Color Best of List
+Fix error if addondata cannot be edited
+Added ability to update metadata for your favorites lists
+Added the ability to share your favorites lists (send to IARL extras) - share your lists!
+Adding Windows 3.X Game list, to be used with DOSBOX.  WINSKI!
+Added VirtualBoy Game List
+Update / cleaned up webutils (thanks knightbaker)
+Updated IARL extras list item to provide info on latest updates

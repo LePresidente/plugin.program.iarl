@@ -30,7 +30,10 @@ iarl_data = {
                             'iarl_setting_history' : plugin.get_setting('iarl_setting_history',int),
                             'local_file_action' : plugin.get_setting('iarl_setting_localfile_action',unicode),
                             'game_select_action' : plugin.get_setting('iarl_setting_default_action',unicode),
-                            'window_theme' : plugin.get_setting('iarl_setting_rom_window_theme',unicode),
+                            'show_search_item' : None, #Initialize variable and set later
+                            'show_randomplay_item' : None, #Initialize variable and set later
+                            'show_history_item' : None, #Initialize variable and set later
+                            'show_extras_item' : None, #Initialize variable and set later
                             'autoplay_trailer' : plugin.get_setting('iarl_setting_autoplay_trailer',unicode),
                             'download_cache' : None, #Initialize variable and set later
                             'ia_enable_login' : None, #Initialize variable and set later
@@ -56,9 +59,10 @@ iarl_data = {
                             'hidden_setting_clear_hidden_archives' : plugin.get_setting('iarl_setting_clear_hidden_archives',bool),
                             'hidden_setting_warn_chd' : plugin.get_setting('iarl_setting_warn_chd',bool),
                             'hidden_setting_warn_iso' : plugin.get_setting('iarl_setting_warn_iso',bool),
+                            'hidden_setting_tou_agree' : plugin.get_setting('iarl_setting_tou',bool),
                             'launch_with_subprocess' : plugin.get_setting('iarl_setting_subprocess_launch',bool),
                             'hard_code_favorite_settings' : plugin.get_setting('iarl_setting_favorite_hard_code',bool),
-                            'hard_coded_include_back_link' : False,
+                            'hard_coded_include_back_link' : plugin.get_setting('iarl_setting_back_link_hard_code',bool),
                         },
             'addon_data':{  'plugin_name' : 'plugin.program.iarl',
                             'log_level' : 'LOG_LEVEL_INFO',
@@ -179,6 +183,40 @@ except ValueError:
 
 if iarl_data['settings']['download_cache'] is None:
     iarl_data['settings']['download_cache'] = 0 #Default to 0 if not initialized correctly
+
+#Convert Show/Hide to True/False
+show_hide_options = {'Show':True,'Hide':False}
+try:
+    iarl_data['settings']['show_search_item'] = show_hide_options[plugin.get_setting('iarl_setting_show_search',unicode)]
+except ValueError:
+    iarl_data['settings']['show_search_item'] = True #Default to True if not initialized correctly
+
+if iarl_data['settings']['show_search_item'] is None:
+    iarl_data['settings']['show_search_item'] = True #Default to True if not initialized correctly
+
+try:
+    iarl_data['settings']['show_randomplay_item'] = show_hide_options[plugin.get_setting('iarl_setting_show_randomplay',unicode)]
+except ValueError:
+    iarl_data['settings']['show_randomplay_item'] = True #Default to True if not initialized correctly
+
+if iarl_data['settings']['show_randomplay_item'] is None:
+    iarl_data['settings']['show_randomplay_item'] = True #Default to True if not initialized correctly
+
+try:
+    iarl_data['settings']['show_history_item'] = show_hide_options[plugin.get_setting('iarl_setting_show_gamehistory',unicode)]
+except ValueError:
+    iarl_data['settings']['show_history_item'] = True #Default to True if not initialized correctly
+
+if iarl_data['settings']['show_history_item'] is None:
+    iarl_data['settings']['show_history_item'] = True #Default to True if not initialized correctly
+
+try:
+    iarl_data['settings']['show_extras_item'] = show_hide_options[plugin.get_setting('iarl_setting_show_extras',unicode)]
+except ValueError:
+    iarl_data['settings']['show_extras_item'] = True #Default to True if not initialized correctly
+
+if iarl_data['settings']['show_extras_item'] is None:
+    iarl_data['settings']['show_extras_item'] = True #Default to True if not initialized correctly
 
 #Convert Enabled/Disabled to True/False
 enabled_disabled_options = {'Enabled':True,'Disabled':False}
@@ -331,7 +369,10 @@ def update_xml_value(xml_id):
         tag_value = args_in['tag_value'][0]
     except:
         tag_value = None
-
+    try:
+        current_xml_name = str(os.path.split(xml_id)[-1])
+    except:
+        current_xml_name = str(xml_id)
     if tag_value == 'emu_downloadpath':
         xbmc.log(msg='IARL:  Updating archive download path for: '+str(xml_id), level=xbmc.LOGDEBUG)
         set_new_dl_path(xml_id,plugin)
@@ -368,6 +409,49 @@ def update_xml_value(xml_id):
         if clear_cache_success:
             current_dialog = xbmcgui.Dialog()
             ok_ret = current_dialog.ok('Complete','Archive Listing Refreshed')
+    elif tag_value == 'update_favorite_metadata':
+        xbmc.log(msg='IARL:  Updating Favorites metadata for: '+str(xml_id), level=xbmc.LOGDEBUG)
+        current_dialog = xbmcgui.Dialog()
+        ret1 = current_dialog.select('Update Favorite Metadata for '+current_xml_name, ['Title','Description','Author','Thumbnail URL','Banner URL','Fanart URL','Logo URL','Youtube Trailer'])
+        if ret1 == 0: #Update Title
+            xbmc.log(msg='IARL:  Updating Favorites title for: '+str(xml_id), level=xbmc.LOGDEBUG)
+            new_xml_text = current_dialog.input('Enter a new title:')
+            set_new_favorite_metadata(xml_id,new_xml_text.replace('\n',' ').replace('\r',' ').replace('<',' ').replace('>',' '),0)
+        elif ret1 == 1: #Update Description
+            xbmc.log(msg='IARL:  Updating Favorites description for: '+str(xml_id), level=xbmc.LOGDEBUG)
+            new_xml_text = current_dialog.input('Enter a new description:')
+            set_new_favorite_metadata(xml_id,new_xml_text.replace('\n','[CR]').replace('\r','[CR]').replace('<',' ').replace('>',' '),1)
+        elif ret1 == 2: #Update Author
+            xbmc.log(msg='IARL:  Updating Favorites author for: '+str(xml_id), level=xbmc.LOGDEBUG)
+            new_xml_text = current_dialog.input('Enter a new author:')
+            set_new_favorite_metadata(xml_id,new_xml_text.replace('\n',' ').replace('\r',' ').replace('<',' ').replace('>',' '),2)
+        elif ret1 == 3: #Update Thumbnail
+            xbmc.log(msg='IARL:  Updating Favorites Thumbnail URL for: '+str(xml_id), level=xbmc.LOGDEBUG)
+            new_xml_text = current_dialog.input('Enter a new Thumbnail URL:')
+            set_new_favorite_metadata(xml_id,new_xml_text.replace('\n',' ').replace('\r',' ').replace('<',' ').replace('>',' '),3)
+        elif ret1 == 4: #Update Banner
+            xbmc.log(msg='IARL:  Updating Favorites Banner URL for: '+str(xml_id), level=xbmc.LOGDEBUG)
+            new_xml_text = current_dialog.input('Enter a new Banner URL:')
+            set_new_favorite_metadata(xml_id,new_xml_text.replace('\n',' ').replace('\r',' ').replace('<',' ').replace('>',' '),4)
+        elif ret1 == 5: #Update Fanart
+            xbmc.log(msg='IARL:  Updating Favorites Fanart URL for: '+str(xml_id), level=xbmc.LOGDEBUG)
+            new_xml_text = current_dialog.input('Enter a new Fanart URL:')
+            set_new_favorite_metadata(xml_id,new_xml_text.replace('\n',' ').replace('\r',' ').replace('<',' ').replace('>',' '),5)
+        elif ret1 == 6: #Update Logo
+            xbmc.log(msg='IARL:  Updating Favorites Logo URL for: '+str(xml_id), level=xbmc.LOGDEBUG)
+            new_xml_text = current_dialog.input('Enter a new Logo URL:')
+            set_new_favorite_metadata(xml_id,new_xml_text.replace('\n',' ').replace('\r',' ').replace('<',' ').replace('>',' '),6)
+        elif ret1 == 7: #Update Video
+            xbmc.log(msg='IARL:  Updating Favorites Video ID for: '+str(xml_id), level=xbmc.LOGDEBUG)
+            new_xml_text = current_dialog.input('Enter a new YouTube URL:')
+            set_new_favorite_metadata(xml_id,new_xml_text.replace('\n',' ').replace('\r',' ').replace('<',' ').replace('>',' '),7)
+        elif ret1 == -1: #Cancelled
+            xbmc.log(msg='IARL:  Updating Favorites metadata was cancelled', level=xbmc.LOGDEBUG)
+        else: #Unknown
+            xbmc.log(msg='IARL:  Unknown selection for metadata update for: '+str(xml_id), level=xbmc.LOGERROR)
+    elif tag_value == 'share_favorites_list':
+        xbmc.log(msg='IARL:  Share Favorites List started for: '+str(xml_id), level=xbmc.LOGDEBUG)
+        share_my_iarl_favorite(xml_id)
     else:
         xbmc.log(msg='IARL:  Context menu selection is not defined', level=xbmc.LOGERROR)
         pass #Do Nothing
@@ -460,6 +544,7 @@ def update_context_favorite(item_in,context_label):
 ## Main Start/Index Page of Addon
 @plugin.route('/')
 def index():
+
     items = []
     initialize_userdata()
     if iarl_data['archive_data'] is None:
@@ -485,6 +570,9 @@ def index():
                             update_context(iarl_data['archive_data']['emu_filepath'][ii],'emu_launch_cmd_review','Review Launch Command'),
                             update_context(iarl_data['archive_data']['emu_filepath'][ii],'hide_archive','Hide This Archive'),
                             update_context(iarl_data['archive_data']['emu_filepath'][ii],'refresh_archive_cache','Refresh Archive Listing'),]
+
+        if 'favorites' in iarl_data['archive_data']['emu_category'][ii].lower(): #Add additional context to Favorites
+            context_menus = context_menus+[update_context(iarl_data['archive_data']['emu_filepath'][ii],'update_favorite_metadata','Update Favorite Metadata'),update_context(iarl_data['archive_data']['emu_filepath'][ii],'share_favorites_list','Share My List!'),]
 
         if 'hidden' not in iarl_data['archive_data']['emu_category'][ii]: #Don't include the archive if it's tagged hidden
             if 'alphabetical' in iarl_data['settings']['listing_convention'].lower(): #List alphabetically
@@ -516,49 +604,17 @@ def index():
             items[-1].set_clearart(items[-1].get_property('clearlogo'))
 
     #Append Search Function
-    items.append(plugin._listitemify({ 
-        'label' : '\xc2\xa0Search',
-        'path' :  plugin.url_for('search_roms_window'),
-        'icon': os.path.join(iarl_data['addon_data']['addon_media_path'],'search.jpg'),
-        'thumbnail' : os.path.join(iarl_data['addon_data']['addon_media_path'],'search.jpg'),
-        'info' : {'genre': '\xc2\xa0',
-                  'date': '01/01/2999',
-                  'plot' : 'Search for a particular game.'},
-        'properties' : {'fanart_image' : os.path.join(iarl_data['addon_data']['addon_media_path'],'fanart.jpg'),
-                        'banner' : os.path.join(iarl_data['addon_data']['addon_media_path'],'search_banner.jpg')}
-        }))
-    items[-1].set_banner(items[-1].get_property('banner'))
-    items[-1].set_landscape(items[-1].get_property('banner'))
-    items[-1].set_poster(items[-1].get_property('poster'))
-    items[-1].set_clearlogo(items[-1].get_property('clearlogo'))
-    items[-1].set_clearart(items[-1].get_property('clearlogo'))
-
-    #Append Random Play Function
-    items.append(plugin._listitemify({ 
-        'label' : '\xc2\xa0\xc2\xa0Random Play',
-        'path' :  plugin.url_for('random_play'),
-        'icon': os.path.join(iarl_data['addon_data']['addon_media_path'],'lucky.jpg'),
-        'thumbnail' : os.path.join(iarl_data['addon_data']['addon_media_path'],'lucky.jpg'),
-        'info' : {'genre': '\xc2\xa0\xc2\xa0', 'date': '01/01/2999', 'plot' : 'Play a random game from the archive.'},
-        'properties' : {'fanart_image' : os.path.join(iarl_data['addon_data']['addon_media_path'],'fanart.jpg'),
-                        'banner' : os.path.join(iarl_data['addon_data']['addon_media_path'],'lucky_banner.jpg')}
-        }))
-    items[-1].set_banner(items[-1].get_property('banner'))
-    items[-1].set_landscape(items[-1].get_property('banner'))
-    items[-1].set_poster(items[-1].get_property('poster'))
-    items[-1].set_clearlogo(items[-1].get_property('clearlogo'))
-    items[-1].set_clearart(items[-1].get_property('clearlogo'))
-
-    if iarl_data['settings']['cache_list']: #Only show if history is turned ON
-        #Append Last Played Function
+    if iarl_data['settings']['show_search_item']:
         items.append(plugin._listitemify({ 
-            'label' : '\xc2\xa0\xc2\xa0\xc2\xa0Last Played',
-            'path' :  plugin.url_for('last_played'),
-            'icon': os.path.join(iarl_data['addon_data']['addon_media_path'],'last_played.jpg'),
-            'thumbnail' : os.path.join(iarl_data['addon_data']['addon_media_path'],'last_played.jpg'),
-            'info' : {'genre': '\xc2\xa0\xc2\xa0\xc2\xa0', 'date': '01/01/2999', 'plot' : 'View your game history.'},
+            'label' : '\xc2\xa0Search',
+            'path' :  plugin.url_for('search_roms_window'),
+            'icon': os.path.join(iarl_data['addon_data']['addon_media_path'],'search.jpg'),
+            'thumbnail' : os.path.join(iarl_data['addon_data']['addon_media_path'],'search.jpg'),
+            'info' : {'genre': '\xc2\xa0',
+                      'date': '01/01/2999',
+                      'plot' : 'Search for a particular game.'},
             'properties' : {'fanart_image' : os.path.join(iarl_data['addon_data']['addon_media_path'],'fanart.jpg'),
-                            'banner' : os.path.join(iarl_data['addon_data']['addon_media_path'],'last_played_banner.jpg')}
+                            'banner' : os.path.join(iarl_data['addon_data']['addon_media_path'],'search_banner.jpg')}
             }))
         items[-1].set_banner(items[-1].get_property('banner'))
         items[-1].set_landscape(items[-1].get_property('banner'))
@@ -566,8 +622,80 @@ def index():
         items[-1].set_clearlogo(items[-1].get_property('clearlogo'))
         items[-1].set_clearart(items[-1].get_property('clearlogo'))
 
+    #Append Random Play Function
+    if iarl_data['settings']['show_randomplay_item']:
+        items.append(plugin._listitemify({ 
+            'label' : '\xc2\xa0\xc2\xa0Random Play',
+            'path' :  plugin.url_for('random_play'),
+            'icon': os.path.join(iarl_data['addon_data']['addon_media_path'],'lucky.jpg'),
+            'thumbnail' : os.path.join(iarl_data['addon_data']['addon_media_path'],'lucky.jpg'),
+            'info' : {'genre': '\xc2\xa0\xc2\xa0', 'date': '01/01/2999', 'plot' : 'Play a random game from the archive.'},
+            'properties' : {'fanart_image' : os.path.join(iarl_data['addon_data']['addon_media_path'],'fanart.jpg'),
+                            'banner' : os.path.join(iarl_data['addon_data']['addon_media_path'],'lucky_banner.jpg')}
+            }))
+        items[-1].set_banner(items[-1].get_property('banner'))
+        items[-1].set_landscape(items[-1].get_property('banner'))
+        items[-1].set_poster(items[-1].get_property('poster'))
+        items[-1].set_clearlogo(items[-1].get_property('clearlogo'))
+        items[-1].set_clearart(items[-1].get_property('clearlogo'))
 
-    return plugin.finish(items, update_listing=True, sort_methods=[xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE, xbmcplugin.SORT_METHOD_GENRE])
+    #Append Last Played Function
+    if iarl_data['settings']['cache_list']: #Only show if history is turned ON
+        if iarl_data['settings']['show_history_item']: #And if enabled in settings
+            items.append(plugin._listitemify({ 
+                'label' : '\xc2\xa0\xc2\xa0\xc2\xa0Last Played',
+                'path' :  plugin.url_for('last_played'),
+                'icon': os.path.join(iarl_data['addon_data']['addon_media_path'],'last_played.jpg'),
+                'thumbnail' : os.path.join(iarl_data['addon_data']['addon_media_path'],'last_played.jpg'),
+                'info' : {'genre': '\xc2\xa0\xc2\xa0\xc2\xa0', 'date': '01/01/2999', 'plot' : 'View your game history.'},
+                'properties' : {'fanart_image' : os.path.join(iarl_data['addon_data']['addon_media_path'],'fanart.jpg'),
+                                'banner' : os.path.join(iarl_data['addon_data']['addon_media_path'],'last_played_banner.jpg')}
+                }))
+            items[-1].set_banner(items[-1].get_property('banner'))
+            items[-1].set_landscape(items[-1].get_property('banner'))
+            items[-1].set_poster(items[-1].get_property('poster'))
+            items[-1].set_clearlogo(items[-1].get_property('clearlogo'))
+            items[-1].set_clearart(items[-1].get_property('clearlogo'))
+
+    #Append IARL Extras
+    if iarl_data['settings']['show_extras_item']:
+        extras_content = get_iarl_extras_update_content()
+        extras_plot = 'Download extra game lists from the community.'
+        extras_date = '01/01/2999'
+        if len(extras_content)>0:
+            try:
+                extras_date = extras_content.split('<last_update>')[1].split('</last_update>')[0]
+                extras_plot = extras_plot+'[CR]Last Updated: '+str(extras_date)+'[CR]Latest Additions:  '+extras_content.split('<last_update_comment>')[1].split('</last_update_comment>')[0]
+            except:
+                extras_date = '01/01/2999'
+                extras_plot = 'Download extra game lists from the community.'
+        items.append(plugin._listitemify({ 
+            'label' : '\xc2\xa0IARL Extras',
+            'path' :  plugin.url_for('get_iarl_extras'),
+            'icon': os.path.join(iarl_data['addon_data']['addon_media_path'],'iarl_extras.jpg'),
+            'thumbnail' : os.path.join(iarl_data['addon_data']['addon_media_path'],'iarl_extras.jpg'),
+            'info' : {'genre': '\xc2\xa0',
+                      'date': extras_date,
+                      'plot' : extras_plot},
+            'properties' : {'fanart_image' : os.path.join(iarl_data['addon_data']['addon_media_path'],'fanart.jpg'),
+                            'banner' : os.path.join(iarl_data['addon_data']['addon_media_path'],'extras_banner.png')}
+            }))
+        items[-1].set_banner(items[-1].get_property('banner'))
+        items[-1].set_landscape(items[-1].get_property('banner'))
+        items[-1].set_poster(items[-1].get_property('poster'))
+        items[-1].set_clearlogo(items[-1].get_property('clearlogo'))
+        items[-1].set_clearart(items[-1].get_property('clearlogo'))
+
+    #if TOU has not been agreed to, show TOU window first
+    if not iarl_data['settings']['hidden_setting_tou_agree']:
+        MyTOUWindow = TOUWindow('TOU.xml',iarl_data['addon_data']['addon_install_path'],'Default','720p')
+        MyTOUWindow.doModal()
+        if 'true' in xbmcaddon.Addon(id='plugin.program.iarl').getSetting(id='iarl_setting_tou'):
+            return plugin.finish(items, update_listing=True, sort_methods=[xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE, xbmcplugin.SORT_METHOD_GENRE])
+        else:
+            return plugin.finish([], update_listing=True)
+    else:
+        return plugin.finish(items, update_listing=True, sort_methods=[xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE, xbmcplugin.SORT_METHOD_GENRE])
 
 @plugin.route('/Emulator/<category_id>/<page_id>')
 def get_rom_page(category_id,page_id):
@@ -824,19 +952,10 @@ def get_selected_rom(category_id,romname):
     else:
         check_for_warn(iarl_data['current_rom_data']['rom_size']) #Added warning for file sizes over 100MB
 
-        #Show ROM Info window selected in settings
+        #Show ROM Info window, skins can override the default window by including script-IARL-infodialog.xml in their skin
         if 'ROM Info Page'.lower() in iarl_data['settings']['game_select_action'].lower():
-            if 'IARL Classic Window'.lower() in iarl_data['settings']['window_theme'].lower():
-                MyROMWindow = ROMWindow('default.xml',iarl_data['addon_data']['addon_install_path'],'Default','720p',iarl_data=iarl_data)
-                MyROMWindow.doModal()
-            # elif: #Not yet implemented
-            #     print xbmc.getSkinDir()
-            #     print get_skin_install_path(xbmc.getSkinDir())
-            #     MyROMWindow = ROMWindow('Confluence.xml',iarl_data['addon_data']['addon_install_path'],'Default','720p',iarl_data=iarl_data)
-            #     MyROMWindow.doModal()
-            else: #Default to classic
-                MyROMWindow = ROMWindow('default.xml',iarl_data['addon_data']['addon_install_path'],'Default','720p',iarl_data=iarl_data)
-                MyROMWindow.doModal()
+            MyROMWindow = ROMWindow('script-IARL-infodialog.xml',iarl_data['addon_data']['addon_install_path'],'Default','720p',iarl_data=iarl_data)
+            MyROMWindow.doModal()
 
         #Download and launch selected in settings
         elif 'Download and Launch'.lower() in iarl_data['settings']['game_select_action'].lower():
@@ -855,6 +974,7 @@ def get_selected_rom(category_id,romname):
 
 @plugin.route('/Search_Results/<search_term>') #Not sure why normal routing with extra kwargs isn't working for this route...
 def search_roms_results(search_term,**kwargs):
+    # xbmc.executebuiltin("Dialog.Close(all, true)")
     search_results = []
 
     current_search_term = search_term.lower().strip()
@@ -1074,6 +1194,48 @@ def last_played():
     else:
         pass
 
+@plugin.route('/Extras')
+def get_iarl_extras():
+    load_success, extras_data = load_iarl_extras()
+    items = []
+
+    if load_success:
+        for ii in range(0,len(extras_data['emu_extras_filename'])):
+            items.append(plugin._listitemify({ 
+                'label' : extras_data['emu_name'][ii],
+                'path': plugin.url_for('download_iarl_extra', xml_filename=extras_data['emu_extras_filename'][ii].split('/')[-1]),
+                'icon': extras_data['emu_logo'][ii],
+                'thumbnail' : extras_data['emu_thumb'][ii],
+                'info' : {'date': extras_data['emu_date'][ii],
+                          'plot': extras_data['emu_plot'][ii],
+                          'trailer': get_youtube_plugin_url(extras_data['emu_trailer'][ii])},
+                'properties' : {'fanart_image' : extras_data['emu_fanart'][ii],
+                                'banner' : extras_data['emu_banner'][ii],
+                                'clearlogo': extras_data['emu_logo'][ii],
+                                'poster': extras_data['emu_thumb'][ii]},
+                # 'context_menu' : context_menus
+                }))
+            items[-1].set_banner(items[-1].get_property('banner'))
+            items[-1].set_landscape(items[-1].get_property('banner'))
+            items[-1].set_poster(items[-1].get_property('poster'))
+            items[-1].set_clearlogo(items[-1].get_property('clearlogo'))
+            items[-1].set_clearart(items[-1].get_property('clearlogo'))
+
+    return plugin.finish(items, update_listing=True, sort_methods=[xbmcplugin.SORT_METHOD_NONE, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE, xbmcplugin.SORT_METHOD_DATE])
+
+@plugin.route('/Extras/<xml_filename>')
+def download_iarl_extra(xml_filename):
+    extra_datfile_base_url = 'https://raw.githubusercontent.com/zach-morris/iarl.extras/master/dat_files/'
+    xbmc.log(msg='IARL:  Requesting IARL extras file: '+str(extra_datfile_base_url+xml_filename), level=xbmc.LOGDEBUG)
+
+    download_success = download_iarl_extra_file(str(extra_datfile_base_url+xml_filename))
+    
+    if download_success:
+        xbmc.log(msg='IARL:  IARL extras file was downloaded: '+str(xml_filename), level=xbmc.LOGDEBUG)
+    else:
+        xbmc.log(msg='IARL:  IARL extras file download failed: '+str(xml_filename), level=xbmc.LOGDEBUG)
+    pass
+
 def download_rom_only(iarl_data):
     xbmc.log(msg='IARL:  Download started for '+str(iarl_data['current_rom_data']['rom_name']), level=xbmc.LOGNOTICE)
 
@@ -1268,6 +1430,40 @@ def post_download_action(iarl_data,option,option2):
             iarl_data['current_save_data']['launch_filename'] = iarl_data['current_save_data']['rom_converted_filenames'][0] #Define the launch filename as the first one
         else:
             xbmc.log(msg='IARL:  There was an error unzipping and reanaming for '+str(iarl_data['current_rom_data']['rom_name']), level=xbmc.LOGERROR)  
+    elif option == 'unzip_standalone_port_file':
+        if iarl_data['current_save_data']['rom_save_filenames']:
+            for filenames in iarl_data['current_save_data']['rom_save_filenames']:
+                if option2 is None:
+                    option2 = iarl_data['current_rom_data']['rom_emu_command']
+                conversion_success, converted_filename = unzip_standalone_port_file(filenames,option2)
+                iarl_data['current_save_data']['rom_converted_filenames'].append(converted_filename)
+                iarl_data['current_save_data']['rom_converted_filenames_success'].append(conversion_success)
+        if iarl_data['current_save_data']['rom_save_supporting_filenames']:
+            for filenames in iarl_data['current_save_data']['rom_save_supporting_filenames']:
+                if option2 is None:
+                    option2 = iarl_data['current_rom_data']['rom_emu_command']
+                conversion_success, converted_filename = unzip_standalone_port_file(filenames,option2)
+                iarl_data['current_save_data']['rom_converted_filenames'].append(converted_filename)
+                iarl_data['current_save_data']['rom_converted_filenames_success'].append(conversion_success)
+        for check in iarl_data['current_save_data']['rom_converted_filenames_success']:
+            if not check:
+                iarl_data['current_save_data']['overall_conversion_success'] = False
+        if iarl_data['current_save_data']['overall_conversion_success']:
+            iarl_data['current_save_data']['launch_filename'] = iarl_data['current_save_data']['rom_converted_filenames'][0] #Define the launch filename as the first one
+        else:
+            xbmc.log(msg='IARL:  There was an error converting Standalone Port files for '+str(iarl_data['current_rom_data']['rom_name']), level=xbmc.LOGERROR)
+    elif option == 'unzip_win31_file':
+        if iarl_data['current_save_data']['rom_save_filenames']:
+            conversion_success, converted_filename = unzip_win31_file(iarl_data['current_rom_data']['rom_title'],iarl_data['current_save_data']['rom_save_filenames'],iarl_data['current_rom_data']['rom_emu_command'])
+            iarl_data['current_save_data']['rom_converted_filenames'].append(converted_filename)
+            iarl_data['current_save_data']['rom_converted_filenames_success'].append(conversion_success)
+        for check in iarl_data['current_save_data']['rom_converted_filenames_success']:
+            if not check:
+                iarl_data['current_save_data']['overall_conversion_success'] = False
+        if iarl_data['current_save_data']['overall_conversion_success']:
+            iarl_data['current_save_data']['launch_filename'] = iarl_data['current_save_data']['rom_converted_filenames'][0] #Define the launch filename as the first one
+        else:
+            xbmc.log(msg='IARL:  There was an error converting Standalone Port files for '+str(iarl_data['current_rom_data']['rom_name']), level=xbmc.LOGERROR)
     elif option == 'unzip_update_rom_path_dosbox':
         if iarl_data['current_save_data']['rom_save_filenames']:
             for filenames in iarl_data['current_save_data']['rom_save_filenames']:
@@ -1561,6 +1757,23 @@ def post_download_action(iarl_data,option,option2):
             iarl_data['current_save_data']['launch_filename'] = iarl_data['current_save_data']['rom_converted_filenames'][0] #Define the launch filename as the first one
         else:
             xbmc.log(msg='IARL:  There was an error converting the zipped adf files for '+str(iarl_data['current_rom_data']['rom_name']), level=xbmc.LOGERROR) 
+    elif 'convert_mame_softlist_dummy_file' in option:
+        try:
+            softlist_type = re.search(r'\([^)]*\)',option).group(0).replace('(','').replace(')','').replace("'",'').strip()
+        except:
+            softlist_type = ''
+            xbmc.log(msg='IARL:  MAME softlist type could not be defined', level=xbmc.LOGERROR)
+        if iarl_data['current_save_data']['rom_save_filenames']:
+            conversion_success, converted_filename = setup_mame_softlist_game_dummy_file(iarl_data,softlist_type)
+            iarl_data['current_save_data']['rom_converted_filenames'].append(converted_filename)
+            iarl_data['current_save_data']['rom_converted_filenames_success'].append(conversion_success)
+        for check in iarl_data['current_save_data']['rom_converted_filenames_success']:
+            if not check:
+                iarl_data['current_save_data']['overall_conversion_success'] = False
+        if iarl_data['current_save_data']['overall_conversion_success']:
+            iarl_data['current_save_data']['launch_filename'] = iarl_data['current_save_data']['rom_converted_filenames'][0] #Define the launch filename as the first one
+        else:
+            xbmc.log(msg='IARL:  There was an error setting up the MAME softlist game '+str(iarl_data['current_rom_data']['rom_name']), level=xbmc.LOGERROR) 
     elif 'convert_mame_softlist' in option:
         try:
             softlist_type = re.search(r'\([^)]*\)',option).group(0).replace('(','').replace(')','').replace("'",'').strip()
@@ -1578,6 +1791,23 @@ def post_download_action(iarl_data,option,option2):
             iarl_data['current_save_data']['launch_filename'] = iarl_data['current_save_data']['rom_converted_filenames'][0] #Define the launch filename as the first one
         else:
             xbmc.log(msg='IARL:  There was an error setting up the MAME softlist game '+str(iarl_data['current_rom_data']['rom_name']), level=xbmc.LOGERROR) 
+    elif 'convert_mess2014_softlist_dummy_file' in option:
+        try:
+            softlist_type = re.search(r'\([^)]*\)',option).group(0).replace('(','').replace(')','').replace("'",'').strip()
+        except:
+            softlist_type = ''
+            xbmc.log(msg='IARL:  MESS2014 softlist type could not be defined', level=xbmc.LOGERROR)
+        if iarl_data['current_save_data']['rom_save_filenames']:
+            conversion_success, converted_filename = setup_mess2014_softlist_game_dummy_file(iarl_data,softlist_type)
+            iarl_data['current_save_data']['rom_converted_filenames'].append(converted_filename)
+            iarl_data['current_save_data']['rom_converted_filenames_success'].append(conversion_success)
+        for check in iarl_data['current_save_data']['rom_converted_filenames_success']:
+            if not check:
+                iarl_data['current_save_data']['overall_conversion_success'] = False
+        if iarl_data['current_save_data']['overall_conversion_success']:
+            iarl_data['current_save_data']['launch_filename'] = iarl_data['current_save_data']['rom_converted_filenames'][0] #Define the launch filename as the first one
+        else:
+            xbmc.log(msg='IARL:  There was an error setting up the MESS2014 softlist game '+str(iarl_data['current_rom_data']['rom_name']), level=xbmc.LOGERROR) 
     elif 'convert_mess2014_softlist' in option:
         try:
             softlist_type = re.search(r'\([^)]*\)',option).group(0).replace('(','').replace(')','').replace("'",'').strip()
@@ -1594,7 +1824,7 @@ def post_download_action(iarl_data,option,option2):
         if iarl_data['current_save_data']['overall_conversion_success']:
             iarl_data['current_save_data']['launch_filename'] = iarl_data['current_save_data']['rom_converted_filenames'][0] #Define the launch filename as the first one
         else:
-            xbmc.log(msg='IARL:  There was an error setting up the MESS2014 softlist game '+str(iarl_data['current_rom_data']['rom_name']), level=xbmc.LOGERROR) 
+            xbmc.log(msg='IARL:  There was an error setting up the MESS2014 softlist game '+str(iarl_data['current_rom_data']['rom_name']), level=xbmc.LOGERROR)
     elif 'favorites_post_action' in option:
         if '|' in option:
             option_1 = rom_emu_command.split('|')[0]
@@ -1763,13 +1993,13 @@ class ROMWindow(xbmcgui.WindowXMLDialog):
         self.left_art2 = self.getControl(111) #Left Art List
         self.right_art2 = self.getControl(112) #Right Art List
         self.play_button = self.getControl(3005) #Play Trailer
-        self.stop_button = self.getControl(3006) #Top Trailer
+        self.stop_button = self.getControl(3006) #Stop Trailer
         self.right_art2.setVisible(True) #Default Fanart visible for trailer control
 
         self.title_box = self.getControl(3007) #Title - Game Name
         self.genre_box = self.getControl(3008) #Genre
         self.players_box = self.getControl(3009) #Number of players
-        self.studio_box = self.getControl(3010) #Number of players
+        self.studio_box = self.getControl(3010) #Studio
         
 
         # get control ids
@@ -1805,6 +2035,9 @@ class ROMWindow(xbmcgui.WindowXMLDialog):
         self.button_action2.setLabel('Launch')
         self.button_exit.setLabel('Close')
 
+        self.button_action1.setEnabled(True)
+        self.button_action2.setEnabled(True)
+        self.button_exit.setEnabled(True)
         # self.plot_box.setText(iarl_data['current_rom_data']['rom_plot']) #Enter the plot if its available
         # self.logo_art.setImage(iarl_data['current_archive_data']['emu_logo']) #Place the emu logo
         # self.title_box.setText(iarl_data['current_rom_data']['rom_title'])
@@ -1878,6 +2111,8 @@ class ROMWindow(xbmcgui.WindowXMLDialog):
     def onClick(self, controlId):
         #Download Only
         if controlId == self.control_id_button_action1:
+            self.button_action1.setEnabled(False)
+
             if xbmc.Player().isPlaying():
                 xbmc.Player().stop()
                 xbmc.sleep(100)
@@ -1888,14 +2123,19 @@ class ROMWindow(xbmcgui.WindowXMLDialog):
                 current_dialog = xbmcgui.Dialog()
                 ok_ret = current_dialog.ok('Complete',iarl_data['current_rom_data']['rom_name']+' was successfully downloaded')
 
+            self.button_action1.setEnabled(True)
+
         #Download and Launch
         if controlId == self.control_id_button_action2:
+            self.button_action2.setEnabled(False)
+
             if xbmc.Player().isPlaying():
                 xbmc.Player().stop()
                 xbmc.sleep(100)
             # self.please_wait.setVisible(True)
             download_and_launch_rom(self,iarl_data)
             # self.please_wait.setVisible(False)
+            self.button_action2.setEnabled(True)
 
         #Play the Trailer
         if controlId == self.control_id_button_action3: #Play the trailer if it exists
@@ -1920,6 +2160,9 @@ class ROMWindow(xbmcgui.WindowXMLDialog):
             if xbmc.Player().isPlaying():
                 xbmc.Player().stop()
                 xbmc.sleep(100)
+
+            self.button_action1.setEnabled(True)
+            self.button_action2.setEnabled(True)
             self.closeDialog()
 
     def doAction(self, controlId):
@@ -2088,6 +2331,58 @@ class SearchWindow(xbmcgui.WindowXMLDialog):
 
     def closeDialog(self):
         self.close()
+
+class TOUWindow(xbmcgui.WindowXMLDialog):
+    def __init__(self,strXMLname, strFallbackPath, strDefaultName, forceFallback, *args, **kwargs):
+        # Changing the three varibles passed won't change, anything
+        # Doing strXMLname = "bah.xml" will not change anything.
+        # don't put GUI sensitive stuff here (as the xml hasn't been read yet
+        # Idea to initialize your variables here
+        self.iarl_data = kwargs
+        xbmc.log(msg='IARL:  TOUWindow Opened', level=xbmc.LOGDEBUG)
+        pass
+    def onInit(self):
+        self.action_exitkeys_id = [10, 13]
+        #Create invisible listitem for skinning purposes
+        # get control ids
+        self.control_id_button_action1 = 3001 #Agree and Close
+        self.control_id_button_exit = 3003 #Do not Agree and Close
+        self.control_id_label_action = 3011
+        # set actions
+        self.button_action1 = self.getControl(self.control_id_button_action1)
+        self.button_exit = self.getControl(self.control_id_button_exit)
+
+    def onAction(self, action):
+        # Same as normal python Windows.  Same as do not agree
+        if action in self.action_exitkeys_id:
+            self.closeDialog()
+
+    def onFocus(self, controlId):
+        pass
+
+    def onClick(self, controlId):
+        #Agree and Close
+        if controlId == self.control_id_button_action1:
+            if xbmc.Player().isPlaying():
+                xbmc.Player().stop()
+                xbmc.sleep(100)
+            xbmcaddon.Addon(id='plugin.program.iarl').setSetting(id='iarl_setting_tou',value='true')
+            xbmc.sleep(500)
+            xbmc.log(msg='IARL:  Terms of Use Agree', level=xbmc.LOGDEBUG)
+            self.closeDialog()
+        #Do not Agree
+        elif controlId == self.control_id_button_exit:
+            if xbmc.Player().isPlaying():
+                xbmc.Player().stop()
+                xbmc.sleep(100)
+            xbmc.log(msg='IARL:  Terms of Use do not Agree', level=xbmc.LOGDEBUG)
+            self.closeDialog()
+    def doAction(self, controlId):
+        # print controlId
+        pass
+    def closeDialog(self):
+        self.close()
+
 
 if __name__ == '__main__':
     plugin.run()

@@ -178,7 +178,7 @@ def make_scripts_executable():
 	#Attempt to make addon scripts executable
 	bin_path = get_addondata_bindir()
 
-	bin_file_list = [os.path.join('7za','7za.android'), os.path.join('7za','7za.armv6l'), os.path.join('7za','7za.armv7l'), os.path.join('7za','7za.exe'), os.path.join('7za','7za.OSX'),os.path.join('7za','7za.Nix'),os.path.join('7za','7za.x86_64'), 'applaunch_OE.sh', 'applaunch-vbs.bat', 'applaunch.bat', 'applaunch.sh',os.path.join('chdman','chdman.armhf'),os.path.join('chdman','chdman.OSX'),os.path.join('chdman','chdman.Nix'),os.path.join('chdman','chdman.exe'),'LaunchKODI.vbs', 'romlaunch_OE_RPi2.sh', 'romlaunch_OE.sh', 'libreelec-fs-uae.sh', 'libreelec-fs-uae.start', 'Sleep.vbs']
+	bin_file_list = [os.path.join('7za','7za.android'), os.path.join('7za','7za.armv6l'), os.path.join('7za','7za.armv7l'), os.path.join('7za','7za.exe'), os.path.join('7za','7za.OSX'),os.path.join('7za','7za.Nix'),os.path.join('7za','7za.x86_64'), 'applaunch_OE.sh', 'applaunch-vbs.bat', 'applaunch.bat', 'applaunch.sh','applaunch_Android.sh','sx05re_launch.sh','sx05re.start',os.path.join('chdman','chdman.armhf'),os.path.join('chdman','chdman.OSX'),os.path.join('chdman','chdman.Nix'),os.path.join('chdman','chdman.exe'),'LaunchKODI.vbs', 'romlaunch_OE_RPi2.sh', 'romlaunch_OE.sh', 'Sleep.vbs','LaunchKODI.vbs']
 	
 	for ffiles in bin_file_list:
 		try:
@@ -420,7 +420,8 @@ def update_history_cache_file(iarl_data,plugin):
 
 			for ii in range(0,max(0,min(iarl_data['settings']['iarl_setting_history'],len(history_list)))): #Iterate up to either the max number of items allowed or the total number of history items
 				if ii < iarl_data['settings']['iarl_setting_history']-1:
-					list_out.append(history_list[ii])
+					if list_out[0]['path'] != history_list[ii]['path']: #Remove any duplicates to the last played
+						list_out.append(history_list[ii])
 
 			save_success = save_userdata_list_cache_file(list_out,'iarl_history')
 
@@ -452,6 +453,85 @@ def load_userdata_list_cache_file(category_id):
 		xbmc.log(msg='IARL: Loaded list cache from file for '+str(category_id), level=xbmc.LOGDEBUG)
 
 	return load_success, list_object
+
+def load_iarl_extras():
+	load_success = False
+	extras_data = {
+	'emu_extras_filename' : list(),
+	'emu_name' : list(),
+	'emu_description' : list(),
+	'emu_version' : list(),
+	'emu_date' : list(),
+	'emu_plot' : list(),
+	'emu_thumb' : list(),
+	'emu_banner' : list(),
+	'emu_fanart' : list(),
+	'emu_logo': list(),
+	'emu_trailer': list(),
+	'total_num_archives' : None,
+	}
+
+	extras_url = 'https://raw.githubusercontent.com/zach-morris/iarl.extras/master/iarl_extras.xml'
+	
+	try:
+		extras_content = makeRequest(extras_url)
+	except:
+		extras_content = None
+		xbmc.log(msg='IARL:  Unable to reach IARL Extras URL', level=xbmc.LOGERROR)
+	if extras_content is not None:
+		extrafile_list = extras_content.split('<extrafile>')
+		for extrafiles in extrafile_list[1:]:
+			try:
+				extras_data['emu_extras_filename'].append(extrafiles.split('<emu_extras_filename>')[1].split('</emu_extras_filename>')[0])
+				extras_data['emu_name'].append(extrafiles.split('<emu_name>')[1].split('</emu_name>')[0])
+				extras_data['emu_description'].append(extrafiles.split('<emu_description>')[1].split('</emu_description>')[0])
+				extras_data['emu_version'].append(extrafiles.split('<emu_version>')[1].split('</emu_version>')[0])
+				extras_data['emu_date'].append(extrafiles.split('<emu_date>')[1].split('</emu_date>')[0])
+				extras_data['emu_plot'].append(extrafiles.split('<emu_comment>')[1].split('</emu_comment>')[0])
+				extras_data['emu_thumb'].append(extrafiles.split('<emu_thumb>')[1].split('</emu_thumb>')[0])
+				extras_data['emu_banner'].append(extrafiles.split('<emu_banner>')[1].split('</emu_banner>')[0])
+				extras_data['emu_fanart'].append(extrafiles.split('<emu_fanart>')[1].split('</emu_fanart>')[0])
+				extras_data['emu_logo'].append(extrafiles.split('<emu_logo>')[1].split('</emu_logo>')[0])
+				extras_data['emu_trailer'].append(extrafiles.split('<emu_trailer>')[1].split('</emu_trailer>')[0])
+			except:
+				pass
+		extras_data['total_num_archives'] = len(extras_data['emu_extras_filename'])
+	else:
+		load_success = False
+	if extras_data['total_num_archives'] is not None:
+		load_success = True
+
+	return load_success, extras_data
+
+def download_iarl_extra_file(extras_url):
+	dl_success = False
+	userdata_xmldir = get_userdata_xmldir()
+	save_filename = os.path.join(userdata_xmldir,os.path.split(extras_url)[-1])
+	current_dialog = xbmcgui.Dialog()
+
+	ret1 = current_dialog.select('Are you sure you want to add this game list?', ['No','Yes'])
+	if ret1 == 0 or ret1 == -1:
+		pass
+	else:
+		#Check to see if file already exists, if it does then ask user if they want to overwite it
+		if os.path.isfile(save_filename):
+			ret2 = current_dialog.select('The file already exists locally, overwrite?', ['No','Yes'])
+			if ret2 == 0:
+				pass
+			else:
+				dl_success = download_tools().Downloader(extras_url,save_filename,False,'','',99999,str(os.path.split(extras_url)[-1]),'Downloading extras file, please wait...') #No login required for github raw files
+				if dl_success:
+					ok_ret = current_dialog.ok('Complete','The list was added.[CR]You may have to update the new list settings for launching')
+				else:
+					ok_ret = current_dialog.ok('Error','There was an error downloading the list.[CR]See log for more details.')
+		else: #Otherwise, download
+			dl_success = download_tools().Downloader(extras_url,save_filename,False,'','',99999,str(os.path.split(extras_url)[-1]),'Downloading extras file, please wait...') #No login required for github raw files
+			if dl_success:
+				ok_ret = current_dialog.ok('Complete','The list was added.[CR]You may have to update the new list settings for launching')
+			else:
+				ok_ret = current_dialog.ok('Error','There was an error downloading the list.[CR]See log for more details.')
+
+	return dl_success
 
 def delete_userdata_list_cache_file(category_id):
 	clear_success = False
@@ -496,7 +576,7 @@ def get_youtube_plugin_url(videoid):
 def update_addonxml(option):
 	current_dialog = xbmcgui.Dialog()
 	ret1 = current_dialog.select('Are you sure you want to update this setting?', ['No','Yes'])
-	if ret1 == 0:
+	if ret1 == 0 or ret1 == -1:
 		pass
 	else:
 		ok_ret = current_dialog.ok('Complete','The addon was updated.[CR]You may have to restart Kodi for the settings to take effect.')
@@ -595,7 +675,10 @@ def initialize_userdata():
 				userdata_file_info = get_xml_header_version(os.path.join(userdata_xmldir,file_name))
 				if addon_file_info['emu_version'][0] == userdata_file_info['emu_version'][0]: #Files are the same, delete addondata file
 					xbmc.log(msg='IARL: '+str(file_name)+' same version detected, deleting addondata file', level=xbmc.LOGDEBUG)
-					os.remove(os.path.join(addondata_xmldir,file_name))
+					try:
+						os.remove(os.path.join(addondata_xmldir,file_name))
+					except:
+						xbmc.log(msg='IARL:  Attempt to delete the old XML file '+str(file_name)+' failed.', level=xbmc.LOGERROR)
 				else:
 					current_dialog = xbmcgui.Dialog()
 					current_dialog.ok('New Version Found', 'New version '+addon_file_info['emu_version'][0]+' for the file:', addon_file_info['emu_name'][0], 'was detected.')
@@ -608,19 +691,28 @@ def initialize_userdata():
 							xbmc.log(msg='IARL:  Attempt to delete the old XML file '+str(file_name)+' failed.', level=xbmc.LOGERROR)
 						copyFile(os.path.join(addondata_xmldir,file_name), os.path.join(userdata_xmldir,file_name))
 						if os.path.isfile(os.path.join(userdata_xmldir,file_name)): #Copy was successful, delete addondata file
-							os.remove(os.path.join(addondata_xmldir,file_name)) #Remove the file from the addondata folder
+							try:
+								os.remove(os.path.join(addondata_xmldir,file_name)) #Remove the file from the addondata folder
+							except:
+								xbmc.log(msg='IARL:  Attempt to delete the old XML file '+str(file_name)+' failed.', level=xbmc.LOGERROR)
 						else:
 							xbmc.log(msg='IARL:  Copying the XML file '+str(file_name)+' failed.', level=xbmc.LOGERROR)
 					elif ret1 == 1: #Remind me later
 						xbmc.log(msg='IARL:  XML File will not be copied at this time', level=xbmc.LOGDEBUG)
 					else: #No, delete the file
 						xbmc.log(msg='IARL:  XML File will be deleted', level=xbmc.LOGDEBUG)
-						os.remove(os.path.join(addondata_xmldir,file_name)) #Remove the file from the addondata folder
+						try:
+							os.remove(os.path.join(addondata_xmldir,file_name)) #Remove the file from the addondata folder
+						except:
+							xbmc.log(msg='IARL:  Attempt to delete the old XML file '+str(file_name)+' failed.', level=xbmc.LOGERROR)
 			else: #The files does not yet exist in userdata
 				xbmc.log(msg='IARL:  Copying new file '+str(file_name)+' to userdata', level=xbmc.LOGDEBUG)
 				copyFile(os.path.join(addondata_xmldir,file_name), os.path.join(userdata_xmldir,file_name))
 				if os.path.isfile(os.path.join(userdata_xmldir,file_name)): #Copy was successful, delete addondata file
-					os.remove(os.path.join(addondata_xmldir,file_name)) #Remove the file from the addondata folder
+					try:
+						os.remove(os.path.join(addondata_xmldir,file_name)) #Remove the file from the addondata folder
+					except:
+						xbmc.log(msg='IARL:  Attempt to delete the old XML file '+str(file_name)+' failed.', level=xbmc.LOGERROR)
 				else:
 					xbmc.log(msg='IARL:  Copying the XML file '+str(file_name)+' failed.', level=xbmc.LOGERROR)
 		xbmc.sleep(500) #Sleep for a moment
@@ -756,7 +848,7 @@ def update_external_launch_commands(iarl_data,xml_id,plugin):
 			external_launch_database_os = iarl_data['settings']['external_launch_env'] + ' Close_Kodi' #Look for launch commands to close Kodi
 		else:
 			external_launch_database_os = iarl_data['settings']['external_launch_env']
-		if iarl_data['settings']['external_launch_env'] in 'OpenElec x86 (tssemek Addon)|LibreElec x86|LibreElec SX05|RPi Gamestarter Addon|Android'.split('|'):
+		if iarl_data['settings']['external_launch_env'] in 'LibreElec Remix|LibreElec Sx05RE|LibreElec S905 Addon|Gamestarter Addon|Android'.split('|'):
 			external_launch_database_os = external_launch_database_os.replace(' Close_Kodi','') #By default, the above setups auto close Kodi, so there's only one list of launchers to choose from
 		for entries in results:
 			if entries['operating_system'][0] == external_launch_database_os:
@@ -1793,9 +1885,121 @@ def unzip_and_rename_file(iarl_data): #This will probably only work when there i
 
 	return zip_success, new_fname
 
+def unzip_standalone_port_file(current_fname,current_rom_emu_command):
+	zip_success = False
+	new_fname = None
+	new_pointer_fname = None
+	new_pointer_content = None
+
+	if zipfile.is_zipfile(current_fname): #First time standalone is downloaded, still in zip
+		try:
+			current_zip_fileparts = os.path.split(current_fname)
+			current_zip_path = current_zip_fileparts[0]
+			z_file = zipfile.ZipFile(current_fname)
+			z_file.extractall(current_zip_path)
+			z_file.close()
+			zip_success = True
+			xbmc.log(msg='IARL:  Standalone Unzip sucessfull for ' +str(current_fname), level=xbmc.LOGDEBUG)
+		except:
+			zip_success = False
+			xbmc.log(msg='IARL:  Standalone Unzip failed for ' +str(current_fname), level=xbmc.LOGERROR)
+		if zip_success:
+			os.remove(current_fname)
+	else:  #Likely standalone files already exist locally, search for them
+		xbmc.log(msg='IARL:  Standalone searching for previously launched file', level=xbmc.LOGDEBUG)
+		for root, dirnames, filenames in os.walk(current_fname):
+			for filename in glob.glob(os.path.join(root,'*.iarl')):
+				if new_pointer_fname is None:
+					new_pointer_fname = filename
+		if new_pointer_fname is None:
+			xbmc.log(msg='IARL:  There was an error unzipping files for '+str(current_fname), level=xbmc.LOGERROR)
+			zip_success = False
+		else:
+			with open(new_pointer_fname, 'r') as content_file:
+				new_pointer_content = content_file.read()
+
+	if new_pointer_content is not None:
+		new_fname = os.path.join(os.path.split(new_pointer_fname)[0],new_pointer_content)
+		xbmc.log(msg='IARL:  Standalone pointing to previously launched file '+str(new_fname), level=xbmc.LOGDEBUG)
+		zip_success = True
+	else:
+		if current_rom_emu_command: #The file was unzipped, change from zip to rom extension
+			try:
+				new_fname = os.path.join(current_zip_path,os.path.join(*current_rom_emu_command.split('/')))
+				#Create a pointer file for launching the same file for future launches of the game
+				new_pointer_fname = os.path.join(os.path.split(new_fname)[0],os.path.splitext(os.path.split(current_fname)[-1])[0]+'.iarl')
+				if not os.path.exists(new_pointer_fname):
+					with open(new_pointer_fname, 'w') as fout:
+						fout.write(current_rom_emu_command.split('/')[-1])
+			except:
+				new_fname = current_fname #Didn't unzip or didn't find a file extension
+		else:
+			new_fname = current_fname #Didn't unzip or didn't find a file extension
+
+	return zip_success, new_fname
+
+
+def unzip_win31_file(current_title,current_fname,current_rom_emu_command):
+	zip_success = False
+	new_fname = None
+	new_pointer_fname = None
+	new_pointer_content = None
+	current_save_fileparts1 = os.path.split(current_fname[0])
+	current_save_fileparts2 = os.path.split(current_fname[1])
+	current_save_path = current_save_fileparts1[0]
+	unzip_folder_name = clean_file_folder_name(current_title)
+	unzip_folder_path = os.path.join(current_save_path,unzip_folder_name)
+
+	if zipfile.is_zipfile(current_fname[0]): #First time standalone is downloaded, still in zip
+		try:
+			z_file = zipfile.ZipFile(current_fname[0])
+			z_file.extractall(unzip_folder_path)
+			z_file.close()
+			zip_success1 = True
+			xbmc.log(msg='IARL:  WIN31 Unzip 1 sucessfull for ' +str(current_fname[0]), level=xbmc.LOGDEBUG)
+		except:
+			zip_success1 = False
+			xbmc.log(msg='IARL:  WIN31 Unzip 1 failed for ' +str(current_fname[0]), level=xbmc.LOGERROR)
+		if zip_success1:
+			os.remove(current_fname[0])
+			# fileList = [os.listdir(unzip_folder_path)filename for filename in os.listdir(unzip_folder_path)]
+		if zipfile.is_zipfile(current_fname[1]): #Supporting win31 files
+			try:
+				current_zip_fileparts = os.path.split(current_fname[1])
+				current_zip_path = current_zip_fileparts[0]
+				z_file = zipfile.ZipFile(current_fname[1])
+				z_file.extractall(unzip_folder_path)
+				z_file.close()
+				zip_success2 = True
+				xbmc.log(msg='IARL:  WIN31 Unzip 2 sucessfull for ' +str(current_fname[1]), level=xbmc.LOGDEBUG)
+			except:
+				zip_success2 = False
+				xbmc.log(msg='IARL:  WIN31 Unzip 2 failed for ' +str(current_fname[1]), level=xbmc.LOGERROR)
+			if zip_success2:
+				os.remove(current_fname[1])
+		if zip_success1 and zip_success2:
+			with open(os.path.join(unzip_folder_path,unzip_folder_name+'.bat'), 'w') as fout: #Update BAT file
+				fout.write('@echo off\r\npath=%path%;\r\ncopy c:\\iniback\\*.* c:\\windows\\\r\nsetini c:\windows\system.ini boot shell "C:\XXCOMMANDXX"\r\nc:\r\ncd \\\r\nc:\\windows\\win\r\n'.replace('XXCOMMANDXX',current_rom_emu_command))
+			zip_success = True
+			new_fname = os.path.join(os.path.join(unzip_folder_path,unzip_folder_name+'.bat'))
+	else:  #Likely launch file exists, look for it
+		xbmc.log(msg='IARL:  WIN31 searching for previously launched file', level=xbmc.LOGDEBUG)
+		if os.path.isfile(os.path.join(unzip_folder_path,unzip_folder_name+'.bat')): #Look for the ini file
+			xbmc.log(msg='IARL:  WIN31 found bat file to launch '+str(os.path.join(unzip_folder_path,unzip_folder_name+'.bat')), level=xbmc.LOGDEBUG)
+			new_fname = os.path.join(unzip_folder_path,unzip_folder_name+'.bat')
+			zip_success = True
+		else:
+			xbmc.log(msg='IARL:  WIN31 unable to find previously launched file', level=xbmc.LOGDEBUG)
+			new_fname = current_fname
+			zip_success = False
+
+	return zip_success, new_fname
+
 def unzip_dosbox_file(current_fname,current_rom_emu_command):
 	zip_success = False
 	new_fname = None
+	new_pointer_fname = None
+	new_pointer_content = None
 
 	if zipfile.is_zipfile(current_fname):
 		try:
@@ -1815,15 +2019,35 @@ def unzip_dosbox_file(current_fname,current_rom_emu_command):
 		if zip_success:
 			os.remove(current_fname)
 	else:
-		xbmc.log(msg='IARL:  There was an error unzipping files for '+str(current_fname), level=xbmc.LOGERROR)
+		xbmc.log(msg='IARL:  DOSBox searching for previously launched file', level=xbmc.LOGDEBUG)
+		for root, dirnames, filenames in os.walk(os.path.split(current_fname)[0]):
+			for filename in glob.glob(os.path.join(root,'*.iarl')):
+				if new_pointer_fname is None:
+					new_pointer_fname = filename
+		if new_pointer_fname is None:
+			xbmc.log(msg='IARL:  There was an error unzipping files for '+str(current_fname), level=xbmc.LOGERROR)
+			zip_success = False
+		else:
+			with open(new_pointer_fname, 'r') as content_file:
+				new_pointer_content = content_file.read()
 
-	if current_rom_emu_command: #The file was unzipped, change from zip to rom extension
-		try:
-			new_fname = os.path.join(current_zip_path,os.path.join(*current_rom_emu_command.split('/')))
-		except:
-			new_fname = current_fname #Didn't unzip or didn't find a file extension
+	if new_pointer_content is not None:
+		new_fname = os.path.join(os.path.split(new_pointer_fname)[0],new_pointer_content)
+		xbmc.log(msg='IARL:  DOSBox pointing to previously launched file '+str(new_fname), level=xbmc.LOGDEBUG)
+		zip_success = True
 	else:
-		new_fname = current_fname #Didn't unzip or didn't find a file extension
+		if current_rom_emu_command: #The file was unzipped, change from zip to rom extension
+			try:
+				new_fname = os.path.join(current_zip_path,os.path.join(*current_rom_emu_command.split('/')))
+				#Create a pointer file for launching the same file for future launches of the game
+				new_pointer_fname = os.path.join(os.path.split(new_fname)[0],os.path.splitext(os.path.split(current_fname)[-1])[0]+'.iarl')
+				if not os.path.exists(new_pointer_fname):
+					with open(new_pointer_fname, 'w') as fout:
+						fout.write(current_rom_emu_command.split('/')[-1])
+			except:
+				new_fname = current_fname #Didn't unzip or didn't find a file extension
+		else:
+			new_fname = current_fname #Didn't unzip or didn't find a file extension
 
 	return zip_success, new_fname
 
@@ -2171,7 +2395,7 @@ def generate_uae4arm_conf_file(iarl_data):
 	if len(iarl_data['current_save_data']['rom_save_filenames'])>4:
 		current_dialog = xbmcgui.Dialog()
 		ret1 = current_dialog.select('There are more than 4 disks for this game, launch anyway?', ['Yes','No'])
-		if ret1 == 0:
+		if ret1 == 0 or ret1 == -1:
 			continue_launch = False
 		else:
 			continue_launch = True
@@ -2260,8 +2484,6 @@ def setup_mame_softlist_game(iarl_data,softlist_type):
 			descParser = DescriptionParserFactory.getParser(parserfile)
 			results = descParser.parseDescription(softlistfile,'xml')
 			softlist_info = [x for x in results if str(softlist_type) in x['system']][0]
-			# print 'ztest'
-			# print softlist_info
 			if check_and_download_hash:
 				current_hash_path = os.path.join(current_sys_path,'mame','hash')
 				save_hash_filename = os.path.join(current_hash_path,os.path.split(softlist_info['web_url'][0])[-1])
@@ -2316,6 +2538,116 @@ def setup_mame_softlist_game(iarl_data,softlist_type):
 
 	return overall_success, new_fname
 
+def setup_mame_softlist_game_dummy_file(iarl_data,softlist_type):
+	overall_success = False
+	converted_success = list()
+	new_fname = None
+	continue_launch = False
+	check_and_download_hash = False
+
+	current_save_fileparts = os.path.split(iarl_data['current_save_data']['rom_save_filenames'][0])
+	current_save_path = current_save_fileparts[0]
+	containing_folder = os.path.split(os.path.dirname(iarl_data['current_save_data']['rom_save_filenames'][0]))[-1]
+	file_base_name = clean_file_folder_name(iarl_data['current_rom_data']['rom_title'])
+	try:
+		current_dummy_file = iarl_data['current_rom_data']['rom_filenames'][0].split('%2F')[1]
+		if len(current_dummy_file)>0:
+			current_dummy_file = current_dummy_file+'.zip'
+		else:
+			current_dummy_file = None
+			xbmc.log(msg='IARL:  Error creating MAME launch filename: ' +str(current_dummy_file), level=xbmc.LOGDEBUG)
+	except:
+		current_dummy_file = None
+		xbmc.log(msg='IARL:  Error creating MAME launch filename: ' +str(current_dummy_file), level=xbmc.LOGDEBUG)
+	current_sys_path = iarl_data['settings']['path_to_retroarch_system_dir']
+
+	if current_sys_path is not None: #If the setting for retroarch system directory is defined, then check for/download hash file
+		if len(current_sys_path)>0:
+			continue_launch = True
+			check_and_download_hash = True
+
+	if not continue_launch:
+		if 'true' in __addon__.getSetting(id='iarl_setting_warn_retroarch_sys_dir').lower():
+			current_dialog = xbmcgui.Dialog()
+			ret1 = current_dialog.select('System Directory setting undefined, try launch anyway?', ['Yes','No','Yes, stop warning me!'])
+			if ret1==0:
+				continue_launch = True
+			elif ret1==1:
+				continue_launch = False
+			else:
+				__addon__.setSetting(id='iarl_setting_warn_retroarch_sys_dir',value='false') #No longer show the warning
+				continue_launch = True
+		else:
+			continue_launch = True
+
+
+	if continue_launch:
+		if len(softlist_type)>0:
+			#1 Check for and download hash file if needed
+			parserfile = get_parser_file('mame_softlist_parser.xml')
+			softlistfile = get_parser_file('mame_softlist_database.xml')
+			descParser = DescriptionParserFactory.getParser(parserfile)
+			results = descParser.parseDescription(softlistfile,'xml')
+			softlist_info = [x for x in results if str(softlist_type) in x['system']][0]
+			if check_and_download_hash:
+				current_hash_path = os.path.join(current_sys_path,'mame','hash')
+				save_hash_filename = os.path.join(current_hash_path,os.path.split(softlist_info['web_url'][0])[-1])
+				if not os.path.exists(current_hash_path):
+					try:
+						os.makedirs(current_hash_path)
+					except:
+						xbmc.log(msg='IARL:  Error creating MAME hash path: ' +str(current_hash_path), level=xbmc.LOGERROR)
+				if not os.path.isfile(save_hash_filename): #Download the hash file if it's not already present
+					# from resources.lib.webutils import *
+					hash_dl_success = download_tools().Downloader(softlist_info['web_url'][0],save_hash_filename,False,'','',99999,str(os.path.split(softlist_info['web_url'][0])),'Downloading hash file, please wait...') #No login required for github raw files
+					if not hash_dl_success:
+						xbmc.log(msg='IARL:  Error downloading MAME hash file: ' +str(softlist_info['web_url'][0]), level=xbmc.LOGERROR)
+				else:
+					xbmc.log(msg='IARL:  MAME Softlist hash file was found for '+str(softlist_type), level=xbmc.LOGDEBUG)
+			#2 Check for correct folder and create if needed, then move all files to the folder
+			if containing_folder == softlist_info['folder_name'][0]: #Save location already correctly named
+				xbmc.log(msg='IARL:  MAME folder already defined for '+str(softlist_type), level=xbmc.LOGDEBUG)
+			else: #Make the correct folder
+				if not os.path.exists(os.path.join(current_save_path,softlist_info['folder_name'][0])):
+					try:
+						os.makedirs(os.path.join(current_save_path,softlist_info['folder_name'][0]))
+					except:
+						xbmc.log(msg='IARL:  Error creating MAME folder path for ' +str(softlist_type), level=xbmc.LOGERROR)
+				for ii in range(0,len(iarl_data['current_save_data']['rom_save_filenames'])):
+					if os.path.isfile(iarl_data['current_save_data']['rom_save_filenames'][ii]): #Copy files to new location
+						new_save_file_location = os.path.join(current_save_path,softlist_info['folder_name'][0],os.path.split(iarl_data['current_save_data']['rom_save_filenames'][ii])[-1])
+						if not os.path.isfile(new_save_file_location):
+							copyFile(iarl_data['current_save_data']['rom_save_filenames'][ii],new_save_file_location)
+						if os.path.isfile(new_save_file_location): #Copy was successful
+							try:
+								if new_save_file_location != iarl_data['current_save_data']['rom_save_filenames'][ii]: #Only remove the old file if the new save location is different
+									os.remove(iarl_data['current_save_data']['rom_save_filenames'][ii]) #Remove the old file
+									xbmc.log(msg='IARL:  File deleted '+str(iarl_data['current_save_data']['rom_save_filenames'][ii]), level=xbmc.LOGDEBUG)
+								else:
+									xbmc.log(msg='IARL:  File already exists and will not be deleted '+str(iarl_data['current_save_data']['rom_save_filenames'][ii]), level=xbmc.LOGDEBUG)
+							except:
+								xbmc.log(msg='IARL:  Old file was not found and could not be deleted '+str(iarl_data['current_save_data']['rom_save_filenames'][ii]), level=xbmc.LOGDEBUG)
+							iarl_data['current_save_data']['rom_save_filenames'][ii] = new_save_file_location
+							converted_success.append(True)
+						else:
+							converted_success.append(False)
+							xbmc.log(msg='IARL:  Copying the XML file '+str(new_save_file_location)+' failed.', level=xbmc.LOGERROR)
+					else:
+						xbmc.log(msg='IARL:  Skipped copy of '+str(iarl_data['current_save_data']['rom_save_filenames'][ii]), level=xbmc.LOGDEBUG)
+			#3 Define new launch filename
+			if False in converted_success:
+				overall_success = False
+			else:
+				overall_success = True
+				new_fname = iarl_data['current_save_data']['rom_save_filenames'][0]
+				if current_dummy_file is not None:
+					new_fname = os.path.join(os.path.split(new_fname)[0],current_dummy_file)
+					if not os.path.exists(new_fname):
+						with open(new_fname, 'w') as fout:
+							fout.write('Empty IARL launch file for MAME!')
+
+	return overall_success, new_fname
+
 def setup_mess2014_softlist_game(iarl_data,softlist_type):
 	overall_success = False
 	converted_success = list()
@@ -2358,8 +2690,6 @@ def setup_mess2014_softlist_game(iarl_data,softlist_type):
 			descParser = DescriptionParserFactory.getParser(parserfile)
 			results = descParser.parseDescription(softlistfile,'xml')
 			softlist_info = [x for x in results if str(softlist_type) in x['system']][0]
-			# print 'ztest'
-			# print softlist_info
 			if check_and_download_hash:
 				current_hash_path = os.path.join(current_sys_path,'mess2014','hash')
 				save_hash_filename = os.path.join(current_hash_path,os.path.split(softlist_info['web_url'][0])[-1])
@@ -2413,6 +2743,117 @@ def setup_mess2014_softlist_game(iarl_data,softlist_type):
 				new_fname = iarl_data['current_save_data']['rom_save_filenames'][0]
 
 	return overall_success, new_fname
+
+def setup_mess2014_softlist_game_dummy_file(iarl_data,softlist_type):
+	overall_success = False
+	converted_success = list()
+	new_fname = None
+	continue_launch = False
+	check_and_download_hash = False
+
+	current_save_fileparts = os.path.split(iarl_data['current_save_data']['rom_save_filenames'][0])
+	current_save_path = current_save_fileparts[0]
+	containing_folder = os.path.split(os.path.dirname(iarl_data['current_save_data']['rom_save_filenames'][0]))[-1]
+	file_base_name = clean_file_folder_name(iarl_data['current_rom_data']['rom_title'])
+	try:
+		current_dummy_file = iarl_data['current_rom_data']['rom_filenames'][0].split('%2F')[1]
+		if len(current_dummy_file)>0:
+			current_dummy_file = current_dummy_file+'.zip'
+		else:
+			current_dummy_file = None
+			xbmc.log(msg='IARL:  Error creating MESS2014 launch filename: ' +str(current_dummy_file), level=xbmc.LOGDEBUG)
+	except:
+		current_dummy_file = None
+		xbmc.log(msg='IARL:  Error creating MESS2014 launch filename: ' +str(current_dummy_file), level=xbmc.LOGDEBUG)
+	current_sys_path = iarl_data['settings']['path_to_retroarch_system_dir']
+
+	if current_sys_path is not None: #If the setting for retroarch system directory is defined, then check for/download hash file
+		if len(current_sys_path)>0:
+			continue_launch = True
+			check_and_download_hash = True
+
+	if not continue_launch:
+		if 'true' in __addon__.getSetting(id='iarl_setting_warn_retroarch_sys_dir').lower():
+			current_dialog = xbmcgui.Dialog()
+			ret1 = current_dialog.select('System Directory setting undefined, try launch anyway?', ['Yes','No','Yes, stop warning me!'])
+			if ret1==0:
+				continue_launch = True
+			elif ret1==1:
+				continue_launch = False
+			else:
+				__addon__.setSetting(id='iarl_setting_warn_retroarch_sys_dir',value='false') #No longer show the warning
+				continue_launch = True
+		else:
+			continue_launch = True
+
+
+	if continue_launch:
+		if len(softlist_type)>0:
+			#1 Check for and download hash file if needed
+			parserfile = get_parser_file('mame_softlist_parser.xml')
+			softlistfile = get_parser_file('mame_softlist_database.xml')
+			descParser = DescriptionParserFactory.getParser(parserfile)
+			results = descParser.parseDescription(softlistfile,'xml')
+			softlist_info = [x for x in results if str(softlist_type) in x['system']][0]
+			if check_and_download_hash:
+				current_hash_path = os.path.join(current_sys_path,'mess2014','hash')
+				save_hash_filename = os.path.join(current_hash_path,os.path.split(softlist_info['web_url'][0])[-1])
+				if not os.path.exists(current_hash_path):
+					try:
+						os.makedirs(current_hash_path)
+					except:
+						xbmc.log(msg='IARL:  Error creating MESS2014 hash path: ' +str(current_hash_path), level=xbmc.LOGERROR)
+				if not os.path.isfile(save_hash_filename): #Download the hash file if it's not already present
+					# from resources.lib.webutils import *
+					hash_dl_success = download_tools().Downloader(softlist_info['web_url'][0],save_hash_filename,False,'','',99999,str(os.path.split(softlist_info['web_url'][0])),'Downloading hash file, please wait...') #No login required for github raw files
+					if not hash_dl_success:
+						xbmc.log(msg='IARL:  Error downloading MESS2014 hash file: ' +str(softlist_info['web_url'][0]), level=xbmc.LOGERROR)
+				else:
+					xbmc.log(msg='IARL:  MESS2014 Softlist hash file was found for '+str(softlist_type), level=xbmc.LOGDEBUG)
+			#2 Check for correct folder and create if needed, then move all files to the folder
+			if containing_folder == softlist_info['folder_name'][0]: #Save location already correctly named
+				xbmc.log(msg='IARL:  MESS2014 folder already defined for '+str(softlist_type), level=xbmc.LOGDEBUG)
+			else: #Make the correct folder
+				if not os.path.exists(os.path.join(current_save_path,softlist_info['folder_name'][0])):
+					try:
+						os.makedirs(os.path.join(current_save_path,softlist_info['folder_name'][0]))
+					except:
+						xbmc.log(msg='IARL:  Error creating MESS2014 folder path for ' +str(softlist_type), level=xbmc.LOGERROR)
+				for ii in range(0,len(iarl_data['current_save_data']['rom_save_filenames'])):
+					if os.path.isfile(iarl_data['current_save_data']['rom_save_filenames'][ii]): #Copy files to new location
+						new_save_file_location = os.path.join(current_save_path,softlist_info['folder_name'][0],os.path.split(iarl_data['current_save_data']['rom_save_filenames'][ii])[-1])
+						if not os.path.isfile(new_save_file_location):
+							copyFile(iarl_data['current_save_data']['rom_save_filenames'][ii],new_save_file_location)
+						if os.path.isfile(new_save_file_location): #Copy was successful
+							try:
+								if new_save_file_location != iarl_data['current_save_data']['rom_save_filenames'][ii]: #Only remove the old file if the new save location is different
+									os.remove(iarl_data['current_save_data']['rom_save_filenames'][ii]) #Remove the old file
+									xbmc.log(msg='IARL:  File deleted '+str(iarl_data['current_save_data']['rom_save_filenames'][ii]), level=xbmc.LOGDEBUG)
+								else:
+									xbmc.log(msg='IARL:  File already exists and will not be deleted '+str(iarl_data['current_save_data']['rom_save_filenames'][ii]), level=xbmc.LOGDEBUG)
+							except:
+								xbmc.log(msg='IARL:  Old file was not found and could not be deleted '+str(iarl_data['current_save_data']['rom_save_filenames'][ii]), level=xbmc.LOGDEBUG)
+							iarl_data['current_save_data']['rom_save_filenames'][ii] = new_save_file_location
+							converted_success.append(True)
+						else:
+							converted_success.append(False)
+							xbmc.log(msg='IARL:  Copying the XML file '+str(new_save_file_location)+' failed.', level=xbmc.LOGERROR)
+					else:
+						xbmc.log(msg='IARL:  Skipped copy of '+str(iarl_data['current_save_data']['rom_save_filenames'][ii]), level=xbmc.LOGDEBUG)
+			#3 Define new launch filename
+			if False in converted_success:
+				overall_success = False
+			else:
+				overall_success = True
+				new_fname = iarl_data['current_save_data']['rom_save_filenames'][0]
+				if current_dummy_file is not None:
+					new_fname = os.path.join(os.path.split(new_fname)[0],current_dummy_file)
+					if not os.path.exists(new_fname):
+						with open(new_fname, 'w') as fout:
+							fout.write('Empty IARL launch file for MESS2014!')
+
+	return overall_success, new_fname
+
 
 def unzip_scummvm_update_conf_file(iarl_data):
 	zip_success = list()
@@ -3037,13 +3478,8 @@ def set_new_post_dl_action(xml_id,plugin):
 	ret1 = current_dialog.select('Select New Post Download Action',post_dl_actions_list)
 
 	try:
-		print 'ztest'
-		print ret1
 		selected_action = post_dl_actions_list[ret1]
 		selected_command = post_dl_commands_list[ret1]
-		print 'ztest'
-		print selected_action
-		print selected_command
 	except:
 		selected_action = 'Cancel'
 		selected_command = None
@@ -3095,6 +3531,136 @@ def set_new_emu_launcher(xml_id,plugin):
 	else:
 		pass
 
+def set_new_favorite_metadata(xml_id,new_xml_text,selection):
+	# ['Title','Description','Author','Thumbnail URL','Banner URL','Fanart URL','Logo URL','Video Trailer']
+	current_xml_fileparts = os.path.split(xml_id)
+	current_xml_filename = current_xml_fileparts[1]
+	current_xml_path = current_xml_fileparts[0]
+	supported_image_extensions = ['gif','jpg','jpeg','png','ico']
+	if selection == 0:
+		if new_xml_text is not None and len(new_xml_text)>0:
+			current_dialog = xbmcgui.Dialog()
+			ret1 = current_dialog.select('Are you sure you want to update Title for '+current_xml_filename, ['Yes','Cancel'])
+			if ret1<1:
+				update_xml_header(current_xml_path,current_xml_filename,'emu_name',new_xml_text)
+				ok_ret = current_dialog.ok('Complete','Title was updated for your list[CR]You may have to restart IARL for the settings to take effect.')
+				delete_userdata_list_cache_file(current_xml_filename.split('.')[0])
+			else:
+				xbmc.log(msg='IARL:  Updating favorites title was cancelled by the user',level=xbmc.LOGDEBUG)
+		else:
+			xbmc.log(msg='IARL:  Updating favorites title was not updated due to an incomplete entry',level=xbmc.LOGDEBUG)
+	elif selection == 1:
+		if new_xml_text is not None and len(new_xml_text)>0:
+			current_dialog = xbmcgui.Dialog()
+			ret1 = current_dialog.select('Are you sure you want to update the descrption for '+current_xml_filename, ['Yes','Cancel'])
+			if ret1<1:
+				update_xml_header(current_xml_path,current_xml_filename,'emu_comment',new_xml_text)
+				ok_ret = current_dialog.ok('Complete','Description was updated for your list[CR]You may have to restart IARL for the settings to take effect.')
+				delete_userdata_list_cache_file(current_xml_filename.split('.')[0])
+			else:
+				xbmc.log(msg='IARL:  Updating favorites description was cancelled by the user',level=xbmc.LOGDEBUG)
+		else:
+			xbmc.log(msg='IARL:  Updating favorites descrption was not updated due to an incomplete entry',level=xbmc.LOGDEBUG)
+	elif selection == 2:
+		if new_xml_text is not None and len(new_xml_text)>0:
+			current_dialog = xbmcgui.Dialog()
+			ret1 = current_dialog.select('Are you sure you want to update the author for '+current_xml_filename, ['Yes','Cancel'])
+			if ret1<1:
+				update_xml_header(current_xml_path,current_xml_filename,'emu_author',new_xml_text)
+				ok_ret = current_dialog.ok('Complete','Author was updated for your list[CR]You may have to restart IARL for the settings to take effect.')
+				delete_userdata_list_cache_file(current_xml_filename.split('.')[0])
+			else:
+				xbmc.log(msg='IARL:  Updating favorites author was cancelled by the user',level=xbmc.LOGDEBUG)
+		else:
+			xbmc.log(msg='IARL:  Updating favorites author was not updated due to an incomplete entry',level=xbmc.LOGDEBUG)
+	elif selection == 3 or selection == 4 or selection == 5 or selection == 6:
+		if selection == 3:
+			tag_to_update = 'emu_thumb'
+		elif selection == 4:
+			tag_to_update = 'emu_banner'
+		elif selection == 5:
+			tag_to_update = 'emu_fanart'
+		elif selection == 6:
+			tag_to_update = 'emu_logo'
+		if new_xml_text is not None and len(new_xml_text)>0:
+			current_dialog = xbmcgui.Dialog()
+			if 'http' not in new_xml_text or new_xml_text.split('.')[-1].lower() not in supported_image_extensions:
+				ok_ret = current_dialog.ok('Error','The image entry must be an URL and of type gif, jpg, png, or ico')
+				xbmc.log(msg='IARL:  Updating favorites image was not correctly formatted: '+str(new_xml_text),level=xbmc.LOGDEBUG)
+			else:
+				ret1 = current_dialog.select('Are you sure you want to update the image for '+current_xml_filename, ['Yes','Cancel'])
+				if ret1<1:
+					update_xml_header(current_xml_path,current_xml_filename,tag_to_update,new_xml_text)
+					ok_ret = current_dialog.ok('Complete','Image was updated for your list[CR]You may have to restart IARL for the settings to take effect.')
+					delete_userdata_list_cache_file(current_xml_filename.split('.')[0])
+				else:
+					xbmc.log(msg='IARL:  Updating favorites image was cancelled by the user',level=xbmc.LOGDEBUG)
+		else:
+			xbmc.log(msg='IARL:  Updating favorites image was not updated due to an incomplete entry',level=xbmc.LOGDEBUG)
+	elif selection == 7:
+		if new_xml_text is not None and len(new_xml_text)>0:
+			current_dialog = xbmcgui.Dialog()
+			ret1 = current_dialog.select('Are you sure you want to update the Video Trailer for '+current_xml_filename, ['Yes','Cancel'])
+			if ret1<1:
+				update_xml_header(current_xml_path,current_xml_filename,'emu_trailer',new_xml_text.split('v=')[-1].split('&')[0])
+				ok_ret = current_dialog.ok('Complete','Video Trailer was updated for your list[CR]You may have to restart IARL for the settings to take effect.')
+				delete_userdata_list_cache_file(current_xml_filename.split('.')[0])
+			else:
+				xbmc.log(msg='IARL:  Updating favorites Video Trailer was cancelled by the user',level=xbmc.LOGDEBUG)
+		else:
+			xbmc.log(msg='IARL:  Updating favorites Video Trailer was not updated due to an incomplete entry',level=xbmc.LOGDEBUG)
+
+def share_my_iarl_favorite(xml_id):
+	current_xml_fileparts = os.path.split(xml_id)
+	current_xml_filename = current_xml_fileparts[1]
+	current_xml_path = current_xml_fileparts[0]
+	current_dialog = xbmcgui.Dialog()
+	ret1 = current_dialog.select('Are you sure you want to upload and share your list '+current_xml_filename, ['Yes','Cancel'])
+	if ret1<1:
+		xbmc.log(msg='IARL:  Share favorites is initiated',level=xbmc.LOGDEBUG)
+		ret2 = current_dialog.select('Do you want to update the metadata for your list before you upload[CR](images, description, etc)?', ['Yes','No'])
+		if ret2<1:
+			ok_ret = current_dialog.ok('Update Metadata First','Please select Update Favorite Metadata from the context menu')
+		else:
+			current_title = None
+			current_author = None
+			current_description = None
+			share_success = False
+			total_lines = 500  #Read up to this many lines looking for the header
+			f=open(xml_id,'rU')
+			f.seek(0)
+			header_end=0
+			line_num=0
+			header_text = ''
+			while header_end < 1:
+				line=f.readline()
+				header_text+=str(line)
+				line_num = line_num+1
+				if '</header>' in header_text: #Found the header
+					header_end = 1
+					header_text = header_text.split('<header>')[1].split('</header>')[0]
+					current_title = header_text.split('<emu_name>')[1].split('</emu_name>')[0]
+					current_author = header_text.split('<emu_author>')[1].split('</emu_author>')[0]
+					current_description = header_text.split('<emu_comment>')[1].split('</emu_comment>')[0]
+					f.close()
+				if line_num == total_lines:  #Couldn't find the header
+					header_end = 1
+					f.close()
+					xbmc.log(msg='IARL:  Unable to parse header in xml file '+str(ffile), level=xbmc.LOGERROR)
+			if current_title is not None and current_author is not None and current_description is not None:
+				from iarl_share_tools import *
+				show_busy_dialog()
+				share_success, share_message = iarl_share_tools().share_fav(current_title,current_author,current_description,xml_id,True)
+				if share_success:
+					hide_busy_dialog()
+					ok_ret = current_dialog.ok('Thank you!','Thanks for sharing, your list will be reviewed for addition into IARL Extras!')
+				else:
+					hide_busy_dialog()
+					ok_ret = current_dialog.ok('Error','Unable to upload your list.  Please see the log.')
+					xbmc.log(msg='IARL:  Unable to upload the xml file '+str(xml_id)+' Share Error: '+str(share_message), level=xbmc.LOGERROR)
+	else:
+		xbmc.log(msg='IARL:  Share favorites was cancelled by the user',level=xbmc.LOGDEBUG)
+
 def check_file_exists_wildcard(file_path,file_name_2,exact_match_req):
 	#A more robust file exists check.  This will check for any file or folder with the same base filename (replacing spaces with wildcard and file extension with wildcard) that is trying to be launched
 	#It will not match retroarch save filetypes like srm, sav, etc
@@ -3126,7 +3692,7 @@ def check_file_exists_wildcard(file_path,file_name_2,exact_match_req):
 			matching_files = matching_files+glob.glob(os.path.join(file_path_base,file_path_name2.replace(',','*').replace(' ','*')+'*')) #Search for the filename with a different extension or folder with same name
 			matching_files = matching_files+glob.glob(os.path.join(file_path_base,'*',file_path_name2.replace(',','*').replace(' ','*')+'*')) #Add recursive search one folder down for MESS type setups
 			matching_files = matching_files+glob.glob(os.path.join(file_path_base,clean_file_folder_name(file_path_name2.replace(',','*').split('(')[0])+'*')) #Add search for processed filenames used in IARL
-		remove_these_filetypes = ['srm','sav','fs','state','auto'] #Save filetypes
+		remove_these_filetypes = ['srm','sav','fs','state','auto','xml','nfo'] #Save filetypes
 		matching_files = list(set([x for x in matching_files if x.split('.')[-1].lower() not in remove_these_filetypes])) #Remove duplicates and save filetypes
 		if len(matching_files)>0: #Matches were found, look for an exact match first
 			xbmc.log(msg='IARL:  Matching files found for '+str(file_path)+': '+str(', '.join(matching_files)), level=xbmc.LOGDEBUG)
@@ -3166,7 +3732,7 @@ def check_downloaded_file(file_path):
 		xbmc.log(msg='IARL:  The file '+str(file_path)+' was 0 bytes in size.', level=xbmc.LOGERROR)
 		os.remove(file_path) #Remove Zero Byte File
 		bad_file_found = True
-	if st.st_size > 1 and st.st_size < 40000: #Small file, check if archive.org returned 'item not found'
+	if st.st_size > 1 and st.st_size < 80000: #Small file, check if archive.org returned 'item not found'
 		try:
 			with open(file_path, 'r') as content_file:
 				file_contents = content_file.read().replace('\n', '')

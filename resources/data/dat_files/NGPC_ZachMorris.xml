@@ -1,121 +1,3 @@
-<?xml version="1.0" ?>
-<!DOCTYPE datafile [
-<!ELEMENT datafile ANY>
-	<!ELEMENT header ANY>
-		<!ELEMENT emu_name (#PCDATA)>
-		<!ELEMENT emu_parser (#PCDATA)>
-		<!ELEMENT emu_description (#PCDATA)>
-		<!ELEMENT emu_category (#PCDATA)>
-		<!ELEMENT emu_version (#PCDATA)>
-		<!ELEMENT emu_date (#PCDATA)>
-		<!ELEMENT emu_author (#PCDATA)>
-		<!ELEMENT emu_homepage (#PCDATA)>
-		<!ELEMENT emu_baseurl (#PCDATA)>
-		<!ELEMENT emu_launcher (#PCDATA)>
-		<!ELEMENT emu_ext_launch_cmd (#PCDATA)>
-		<!ELEMENT emu_downloadpath (#PCDATA)>
-		<!ELEMENT emu_postdlaction (#PCDATA)>
-		<!ELEMENT emu_comment (#PCDATA)>
-		<!ELEMENT emu_thumb (#PCDATA)>
-		<!ELEMENT emu_banner (#PCDATA)>
-		<!ELEMENT emu_fanart (#PCDATA)>
-		<!ELEMENT emu_logo (#PCDATA)>
-		<!ELEMENT emu_trailer (#PCDATA)>
-	<!ELEMENT game ANY>
-		<!ATTLIST game name CDATA #REQUIRED>
-		<!ELEMENT description (#PCDATA)>
-		<!ELEMENT rom EMPTY>
-			<!ATTLIST rom name CDATA #REQUIRED>
-			<!ATTLIST rom size CDATA #REQUIRED>
-			<!ATTLIST rom crc CDATA #IMPLIED>
-			<!ATTLIST rom sha1 CDATA #IMPLIED>
-			<!ATTLIST rom status (baddump|nodump|good|verified) "good">
-		<!ELEMENT title_clean (#PCDATA)>
-		<!ELEMENT plot (#PCDATA)>
-		<!ELEMENT releasedate (#PCDATA)>
-		<!ELEMENT year (#PCDATA)>
-		<!ELEMENT genre (#PCDATA)>
-		<!ELEMENT studio (#PCDATA)>
-		<!ELEMENT nplayers (#PCDATA)>
-		<!ELEMENT perspective (#PCDATA)>
-		<!ELEMENT rating (#PCDATA)>
-		<!ELEMENT ESRB (#PCDATA)>
-		<!ELEMENT videoid (#PCDATA)>
-		<!ELEMENT thegamesdb_id (#PCDATA)>
-		<!ELEMENT gamefaqs_url (#PCDATA)>
-		<!ELEMENT moby_url (#PCDATA)>
-		<!ELEMENT consolegrid_url (#PCDATA)>
-		<!ELEMENT boxart1 (#PCDATA)>
-		<!ELEMENT boxart2 (#PCDATA)>
-		<!ELEMENT boxart3 (#PCDATA)>
-		<!ELEMENT boxart4 (#PCDATA)>
-		<!ELEMENT boxart5 (#PCDATA)>
-		<!ELEMENT boxart6 (#PCDATA)>
-		<!ELEMENT boxart7 (#PCDATA)>
-		<!ELEMENT boxart8 (#PCDATA)>
-		<!ELEMENT boxart9 (#PCDATA)>
-		<!ELEMENT boxart10 (#PCDATA)>
-		<!ELEMENT snapshot1 (#PCDATA)>
-		<!ELEMENT snapshot2 (#PCDATA)>
-		<!ELEMENT snapshot3 (#PCDATA)>
-		<!ELEMENT snapshot4 (#PCDATA)>
-		<!ELEMENT snapshot5 (#PCDATA)>
-		<!ELEMENT snapshot6 (#PCDATA)>
-		<!ELEMENT snapshot7 (#PCDATA)>
-		<!ELEMENT snapshot8 (#PCDATA)>
-		<!ELEMENT snapshot9 (#PCDATA)>
-		<!ELEMENT snapshot10 (#PCDATA)>		
-		<!ELEMENT fanart1 (#PCDATA)>
-		<!ELEMENT fanart2 (#PCDATA)>
-		<!ELEMENT fanart3 (#PCDATA)>
-		<!ELEMENT fanart4 (#PCDATA)>
-		<!ELEMENT fanart5 (#PCDATA)>
-		<!ELEMENT fanart6 (#PCDATA)>
-		<!ELEMENT fanart7 (#PCDATA)>
-		<!ELEMENT fanart8 (#PCDATA)>
-		<!ELEMENT fanart9 (#PCDATA)>
-		<!ELEMENT fanart10 (#PCDATA)>
-		<!ELEMENT fanart11 (#PCDATA)>
-		<!ELEMENT fanart12 (#PCDATA)>
-		<!ELEMENT fanart13 (#PCDATA)>
-		<!ELEMENT fanart14 (#PCDATA)>
-		<!ELEMENT fanart15 (#PCDATA)>
-		<!ELEMENT fanart16 (#PCDATA)>
-		<!ELEMENT fanart17 (#PCDATA)>
-		<!ELEMENT fanart18 (#PCDATA)>
-		<!ELEMENT fanart19 (#PCDATA)>
-		<!ELEMENT fanart20 (#PCDATA)>
-		<!ELEMENT fanart21 (#PCDATA)>
-		<!ELEMENT fanart22 (#PCDATA)>
-		<!ELEMENT fanart23 (#PCDATA)>
-		<!ELEMENT fanart24 (#PCDATA)>
-		<!ELEMENT fanart25 (#PCDATA)>
-		<!ELEMENT fanart26 (#PCDATA)>
-		<!ELEMENT fanart27 (#PCDATA)>
-		<!ELEMENT fanart28 (#PCDATA)>
-		<!ELEMENT fanart29 (#PCDATA)>
-		<!ELEMENT fanart30 (#PCDATA)>
-		<!ELEMENT banner1 (#PCDATA)>
-		<!ELEMENT banner2 (#PCDATA)>
-		<!ELEMENT banner3 (#PCDATA)>
-		<!ELEMENT banner4 (#PCDATA)>
-		<!ELEMENT banner5 (#PCDATA)>
-		<!ELEMENT banner6 (#PCDATA)>
-		<!ELEMENT banner7 (#PCDATA)>
-		<!ELEMENT banner8 (#PCDATA)>
-		<!ELEMENT banner9 (#PCDATA)>
-		<!ELEMENT banner10 (#PCDATA)>
-		<!ELEMENT clearlogo1 (#PCDATA)>
-		<!ELEMENT clearlogo2 (#PCDATA)>
-		<!ELEMENT clearlogo3 (#PCDATA)>
-		<!ELEMENT clearlogo4 (#PCDATA)>
-		<!ELEMENT clearlogo5 (#PCDATA)>
-		<!ELEMENT clearlogo6 (#PCDATA)>
-		<!ELEMENT clearlogo7 (#PCDATA)>
-		<!ELEMENT clearlogo8 (#PCDATA)>
-		<!ELEMENT clearlogo9 (#PCDATA)>
-		<!ELEMENT clearlogo10 (#PCDATA)>
-]>
 <datafile>
 	<header>
 		<emu_name>Neo Geo Pocket Color - NGPC</emu_name>
@@ -131,29 +13,11 @@
 		<emu_ext_launch_cmd>none</emu_ext_launch_cmd>
 		<emu_downloadpath>default</emu_downloadpath>
 		<emu_postdlaction>unzip_rom</emu_postdlaction>
-		<emu_comment>No Intro NGPC List by Zach Morris, filtered to remove duplicates and games not many people actually want to play.
-
-The Neo Geo Pocket Color (shortened NGPC), is a 16-bit colour handheld video game console manufactured by SNK. It is a successor to SNK's monochrome Neo Geo Pocket handheld which debuted in 1998 in Japan. The Neo Geo Pocket Color was released on March 16, 1999 in Japan, August 6, 1999 in North America, and some time in 1999 in Europe. The Neo Geo Pocket Color was SNK's last video game console, and is backwards compatible with the Neo Geo Pocket. In 2000, following SNK's purchase by American pachinko manufacturer Aruze, the Neo Geo Pocket Color was dropped from both the North American and European markets. It did, however, last until 2001 in Japan, with a total of 2 million units sold.
-
-Developer:  SNK
-
-CPU:  Toshiba TLCS900H core (16-bit), 6.144 MHz, Z80 at 3.072 MHz for sound
-
-Memory:  12 k for 900H, 4k for Z80 (shared with the 900H)
-
-Graphics:  160x152 (256x256 virtual screen)
-
-Sound:  SN76489 variant, T6W28 (3 square wave tone generators with limited stereo capability plus 1 monaural noise generator plus direct access to the two 6 bits DAC)
-
-Display:  16 palettes per plane, 48 palettes. 146 colors on screen out of 4096 (or 20 colors out of 4096 in monochrome mode)
-
-Media:  Cartridge
-
-Max Controllers:  1</emu_comment>
-			<emu_thumb>special://home/addons/plugin.program.iarl/resources/skins/Default/media/4923-1.jpg</emu_thumb>
-			<emu_banner>http://thegamesdb.net/banners/platform/banners/24-1.jpg</emu_banner>
-			<emu_fanart>https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Neo-Geo-Pocket-Color-Blue-Left.jpg/1280px-Neo-Geo-Pocket-Color-Blue-Left.jpg</emu_fanart>
-			<emu_logo>https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/SNK_NeoGeo_Pocket_logo.png/369px-SNK_NeoGeo_Pocket_logo.png</emu_logo>
+		<emu_comment>No Intro NGPC List by Zach Morris, filtered to remove duplicates and games not many people actually want to play.[CR]The Neo Geo Pocket Color (shortened NGPC), is a 16-bit colour handheld video game console manufactured by SNK. It is a successor to SNK's monochrome Neo Geo Pocket handheld which debuted in 1998 in Japan. The Neo Geo Pocket Color was released on March 16, 1999 in Japan, August 6, 1999 in North America, and some time in 1999 in Europe. The Neo Geo Pocket Color was SNK's last video game console, and is backwards compatible with the Neo Geo Pocket. In 2000, following SNK's purchase by American pachinko manufacturer Aruze, the Neo Geo Pocket Color was dropped from both the North American and European markets. It did, however, last until 2001 in Japan, with a total of 2 million units sold.[CR]Developer:  SNK[CR]CPU:  Toshiba TLCS900H core (16-bit), 6.144 MHz, Z80 at 3.072 MHz for sound[CR]Memory:  12 k for 900H, 4k for Z80 (shared with the 900H)[CR]Graphics:  160x152 (256x256 virtual screen)[CR]Sound:  SN76489 variant, T6W28 (3 square wave tone generators with limited stereo capability plus 1 monaural noise generator plus direct access to the two 6 bits DAC)[CR]Display:  16 palettes per plane, 48 palettes. 146 colors on screen out of 4096 (or 20 colors out of 4096 in monochrome mode)[CR]Media:  Cartridge[CR]Max Controllers:  1</emu_comment>
+			<emu_thumb>https://i.imgur.com/t2LEnKw.jpg</emu_thumb>
+			<emu_banner>https://i.imgur.com/H4WRIE4.jpg</emu_banner>
+			<emu_fanart>https://i.imgur.com/eXLfwyd.jpg</emu_fanart>
+			<emu_logo>https://i.imgur.com/NCQDAPd.png</emu_logo>
 			<emu_trailer>dUHYNmNrqoY</emu_trailer>
 		</header>
 			<game name="Bakumatsu Rouman Tokubetsu Hen - Gekka no Kenshi - Tsuki ni Saku Hana, Chiri Yuku Hana (Japan)">
